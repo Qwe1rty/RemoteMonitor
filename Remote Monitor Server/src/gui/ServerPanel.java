@@ -17,15 +17,16 @@ public class ServerPanel extends JPanel {
 
 	public ServerPanel() {
 		
-		sidePanel = new SidePanel(new String[0]);
+		sidePanel = new SidePanel(new String[] {"Run the client stub on a target computer to connect!"});
 		
-//		setPreferredSize(new Dimension(ServerFrame.WINDOW_WIDTH, ServerFrame.WINDOW_HEIGHT));
-//		setLayout(null);
+		setPreferredSize(new Dimension(ServerFrame.WINDOW_WIDTH, ServerFrame.WINDOW_HEIGHT));
+		setLayout(null);
 		
-//		clientList.setBounds(15, 15, LIST_WIDTH, ServerFrame.WINDOW_HEIGHT - 15);
-//		sidePanel.setBounds(LIST_WIDTH + 30, 15, ServerFrame.WINDOW_WIDTH - 15, ServerFrame.WINDOW_HEIGHT - 15);
+		clientList.setBounds(15, 15, LIST_WIDTH, ServerFrame.WINDOW_HEIGHT - 15);
+		sidePanel.setBounds(LIST_WIDTH + 30, 15, ServerFrame.WINDOW_WIDTH - (45 + LIST_WIDTH), ServerFrame.WINDOW_HEIGHT - 15);
+//		sidePanel.setBounds(0, 0, ServerFrame.WINDOW_WIDTH - 5, ServerFrame.WINDOW_HEIGHT);
 		
-//		add(clientList);
+		add(clientList);
 		add(sidePanel);
 	}
 	
@@ -44,7 +45,7 @@ public class ServerPanel extends JPanel {
 	
 	public void paintComponent(Graphics g) {
 		super.paintComponent(g);
-		g.setColor(Color.BLACK);
+		g.setColor(Color.GRAY);
 		g.drawLine(14, 14, 15 + LIST_WIDTH, 14);
 		g.drawLine(14, 14, 14, ServerFrame.WINDOW_HEIGHT);
 		g.drawLine(15 + LIST_WIDTH, 14, 15 + LIST_WIDTH, ServerFrame.WINDOW_HEIGHT);

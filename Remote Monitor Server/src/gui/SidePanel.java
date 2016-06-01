@@ -1,43 +1,50 @@
-package gui;
+	package gui;
 
-import java.awt.Color;
+import java.awt.BorderLayout;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
+import javax.swing.border.EtchedBorder;
 
 public class SidePanel extends JPanel {
 
 	public SidePanel(String[] log) {
-//		setLayout(null);
+		setLayout(new BorderLayout());
+		setBorder(new EtchedBorder());
 		
 		JTextArea text = new JTextArea();
 		text.setEditable(false);
-		text.setBounds(0, 0, (ServerFrame.WINDOW_WIDTH - 15) - (ServerPanel.LIST_WIDTH + 30), 
-				ServerFrame.WINDOW_HEIGHT - 30);
+		text.setLineWrap(true);
+		text.setWrapStyleWord(true);
+		
+		for (int i = 0; i < log.length; i++)
+			text.append(log[i] + "\n");
+		
 		JScrollPane scroll = new JScrollPane(text);
 		scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-		add(scroll);
+		
+		add(scroll, BorderLayout.CENTER);
 	}
 	
-//	public SidePanel(final BufferedImage img) {
-//		setLayout(null);
-//		JPanel canvas = new JPanel() {
-//			protected void paintComponent(Graphics g) {
-//				super.paintComponent(g);
-//				g.drawImage(img, 0, 0, null);
-//			}
-//		};
-//		canvas.setBounds(0, 0, (ServerFrame.WINDOW_WIDTH - 15) - (ServerPanel.LIST_WIDTH + 30), 
-//				ServerFrame.WINDOW_HEIGHT - 30);
-//		JScrollPane spane = new JScrollPane(canvas);
-////		spane.setBounds(0, 0, (ServerFrame.WINDOW_WIDTH - 15) - (ServerPanel.LIST_WIDTH + 30), ServerFrame.WINDOW_HEIGHT - 30);
-//		add(spane);
-//	}
+	public SidePanel(final BufferedImage img) {
+		setLayout(new BorderLayout());
+		setBorder(new EtchedBorder());
+		
+		JPanel canvas = new JPanel() {
+			protected void paintComponent(Graphics g) {
+				super.paintComponent(g);
+				g.drawImage(img, 0, 0, null);
+			}
+		};
+		JScrollPane scroll = new JScrollPane(canvas);
+		scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+		
+		add(scroll, BorderLayout.CENTER);
+	}
 	
 //	public void paintComponent(Graphics g) {
 //		super.paintComponent(g);
