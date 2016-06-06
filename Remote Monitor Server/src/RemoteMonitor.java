@@ -35,6 +35,8 @@ public class RemoteMonitor {
 
 		// Creates the server frame
 		frame = new ServerFrame("Remote Monitor");
+		
+		// Sets up 
 
 		frame.mainPanel.setSidePanel(new String[] {"dank", "memes"});
 	}

@@ -4,7 +4,7 @@ import javax.swing.JFrame;
 
 public class ServerFrame extends JFrame {
 
-	public static ServerPanel mainPanel;
+	public ServerPanel mainPanel;
 	
 	protected static final int WINDOW_HEIGHT = 700;
 	protected static final int WINDOW_WIDTH = 1200;
@@ -13,7 +13,6 @@ public class ServerFrame extends JFrame {
 	public ServerFrame(String title) {
 		super(title);
 		mainPanel = new ServerPanel();
-//		getContentPane().add(new SidePanel(new String[0]));
 		getContentPane().add(mainPanel);
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);

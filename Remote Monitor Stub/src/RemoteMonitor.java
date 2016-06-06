@@ -1,4 +1,10 @@
 import java.io.UnsupportedEncodingException;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.InterfaceAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
@@ -7,9 +13,10 @@ import javax.swing.UIManager;
 
 public class RemoteMonitor {
 
+	private static int port = 60922;
 	private static String key;
 
-	public static void main(String[] args) throws NoSuchAlgorithmException, UnsupportedEncodingException {
+	public static void main(String[] args) throws NoSuchAlgorithmException, UnsupportedEncodingException, UnknownHostException, SocketException {
 
 		// Greatest line of code of all time 
 		try {UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());} catch (Exception e) {}
@@ -27,6 +34,9 @@ public class RemoteMonitor {
 				break;
 			} else firstInput = false;
 		} while (true);
+		
+		// Setup for packet sending
+	
 	}
 	
 	public static String generateHash(String input) throws NoSuchAlgorithmException, UnsupportedEncodingException {
