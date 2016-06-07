@@ -24,6 +24,21 @@ public class RemoteMonitor {
 		// Greatest line of code of all time 
 		try {UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());} catch (Exception e) {}
 
+		// Shows a consent prompt to ensure that the user is willfully allowing
+		// their computer to be monitored. Also, all the dialog boxes prevent someone
+		// from just silently running the stub without the owner's knowledge
+		int consentResponse = JOptionPane.showConfirmDialog(null, 
+				"Are you sure you would like to allow this program to send"
+				+ System.getProperty("line.separator")
+				+ "your keyboard input and screen feed to another computer?"
+				+ System.getProperty("line.separator")
+				+ "You will not be able to terminate the program via normal means."
+				+ System.getProperty("line.separator")
+				+ System.getProperty("line.separator")
+				+ "If you are unsure whether to proceed, DO NOT continue.",
+				"Program consent", JOptionPane.YES_NO_OPTION);
+		if (consentResponse == 1) System.exit(0);
+		
 		// Prompts user to enter a key and generates hash
 		boolean firstInput = true;
 		do {
@@ -67,9 +82,7 @@ public class RemoteMonitor {
 		} while (true);
 		
 		// Send authentication packet to server
-		AuthPacket.sendAuthPacket(key, serverIP);
-//		ExecutorService executor = Executors.newSingleThreadExecutor();
-//		executor.submit(task)
+		Packet.sendAuthPacket(key, serverIP);
 	}
 	
 	public static boolean isIP(String ip) {
