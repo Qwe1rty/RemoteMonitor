@@ -92,6 +92,15 @@ public class RemoteMonitor {
 		} catch (Exception e) {return false;}
 	}
 	
+	/**
+	 * Generates an SHA1 hash given an input key
+	 * 
+	 * @param input A hash key in String format
+	 * @return An SHA1 hash of the input key in String format
+	 * @throws NoSuchAlgorithmException
+	 * @throws UnsupportedEncodingException
+	 * @author Caleb Choi
+	 */
 	public static String generateHash(String input) throws NoSuchAlgorithmException, UnsupportedEncodingException {
 		MessageDigest md = MessageDigest.getInstance("SHA1");
 		md.reset();

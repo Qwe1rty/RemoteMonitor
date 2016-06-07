@@ -1,3 +1,5 @@
+package net;
+
 /**
  * This class contains all the packet headers for server/client communications 
  * @author Caleb Choi

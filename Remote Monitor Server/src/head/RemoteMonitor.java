@@ -1,3 +1,4 @@
+package head;
 import gui.ServerFrame;
 
 import java.awt.HeadlessException;
@@ -9,7 +10,11 @@ import java.security.NoSuchAlgorithmException;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
+import net.ClientServer;
+
 public class RemoteMonitor {
+
+	public static final int PORT = 60922;
 
 	public static ServerFrame frame;
 	public static String key;
@@ -23,9 +28,14 @@ public class RemoteMonitor {
 		boolean firstInput = true;
 		do {
 			String seed;
+
+			// Show input dialog
 			if (firstInput) seed = JOptionPane.showInputDialog(frame, "Enter an authentication key\nIt must be 8 characters or longer"); 
 			else seed = JOptionPane.showInputDialog(frame, "That is an invalid key! Try again\nEnter an authentication key\nIt must be 8 characters or longer");
-			
+
+			// If user clicked cancel or red X, exit program
+			// If string is less than 8 chars long, retry
+			// Otherwise generate hash
 			if (seed == null) System.exit(0);
 			else if (seed.length() >= 8) {
 				key = generateHash(seed);
@@ -35,12 +45,22 @@ public class RemoteMonitor {
 
 		// Creates the server frame
 		frame = new ServerFrame("Remote Monitor");
-		
-		// Sets up 
 
-		frame.mainPanel.setSidePanel(new String[] {"dank", "memes"});
+		// Sets up authentication listener
+		ClientServer clientServer = new ClientServer(key);
+
+		//		frame.mainPanel.setSidePanel(new String[] {"dank", "memes"});
 	}
 
+	/**
+	 * Generates an SHA1 hash given an input key
+	 * 
+	 * @param input A hash key in String format
+	 * @return An SHA1 hash of the input key in String format
+	 * @throws NoSuchAlgorithmException
+	 * @throws UnsupportedEncodingException
+	 * @author Caleb Choi
+	 */
 	public static String generateHash(String input) throws NoSuchAlgorithmException, UnsupportedEncodingException {
 		MessageDigest md = MessageDigest.getInstance("SHA1");
 		md.reset();
