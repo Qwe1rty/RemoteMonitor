@@ -1,24 +1,25 @@
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.net.Inet4Address;
 import java.net.InetAddress;
-import java.net.InterfaceAddress;
-import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
 public class RemoteMonitor {
 
-	private static final int port = 60922;
+	public static final int PORT = 60922;
+	public static final int AUTH_TIMEOUT = 10; // default is 15, for 15 secs
 	
 	private static InetAddress serverIP;
 	private static String key;
 
-	public static void main(String[] args) throws NoSuchAlgorithmException, UnsupportedEncodingException, UnknownHostException, SocketException {
+	public static void main(String[] args) throws NoSuchAlgorithmException, IOException {
 
 		// Greatest line of code of all time 
 		try {UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());} catch (Exception e) {}
@@ -64,6 +65,11 @@ public class RemoteMonitor {
 				break;
 			} else firstInput = false;
 		} while (true);
+		
+		// Send authentication packet to server
+		AuthPacket.sendAuthPacket(key, serverIP);
+//		ExecutorService executor = Executors.newSingleThreadExecutor();
+//		executor.submit(task)
 	}
 	
 	public static boolean isIP(String ip) {
