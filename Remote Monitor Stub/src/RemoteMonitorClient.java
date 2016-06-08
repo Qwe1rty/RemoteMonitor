@@ -83,11 +83,8 @@ public class RemoteMonitorClient {
 		
 		// Send authentication packet to server
 		try {
-			if (ClientPacket.sendAuthPacket(key, serverIP, PORT)) {
-				if (Connection.establishConnection(serverIP, PORT)) {
+			if (Connection.establishConnection(serverIP, PORT)) {
 					
-				}
-				
 			} else // If the authentication was not successful
 				throw new Exception("nope");
 			
