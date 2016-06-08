@@ -10,9 +10,9 @@ import java.security.NoSuchAlgorithmException;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
-import net.ClientServer;
+import net.ConnectionServer;
 
-public class RemoteMonitor {
+public class RemoteMonitorServer {
 
 	public static final int PORT = 60922;
 
@@ -46,10 +46,9 @@ public class RemoteMonitor {
 		// Creates the server frame
 		frame = new ServerFrame("Remote Monitor");
 
-		// Sets up authentication listener
-		ClientServer clientServer = new ClientServer(key);
-
-		//		frame.mainPanel.setSidePanel(new String[] {"dank", "memes"});
+		// Sets up authentication listener. Main thread will be listening for new connections
+		// until program is closed
+		ConnectionServer clientServer = new ConnectionServer(key, PORT);
 	}
 
 	/**

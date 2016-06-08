@@ -11,7 +11,7 @@ import java.util.concurrent.Executors;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
-public class RemoteMonitor {
+public class RemoteMonitorClient {
 
 	public static final int PORT = 60922;
 	public static final int AUTH_TIMEOUT = 10; // default is 15, for 15 secs
@@ -76,13 +76,28 @@ public class RemoteMonitor {
 			
 			// Check if entered IP is valid. If so, keep it
 			else if (isIP(serverIP)) {
-				RemoteMonitor.serverIP = InetAddress.getByName(serverIP);
+				RemoteMonitorClient.serverIP = InetAddress.getByName(serverIP);
 				break;
 			} else firstInput = false;
 		} while (true);
 		
 		// Send authentication packet to server
-		Packet.sendAuthPacket(key, serverIP);
+		try {
+			if (ClientPacket.sendAuthPacket(key, serverIP, PORT)) {
+				if (Connection.establishConnection(serverIP, PORT)) {
+					
+				}
+				
+			} else // If the authentication was not successful
+				throw new Exception("nope");
+			
+		} catch (Exception e) { // If anything goes wrong, inform user of failure 
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, 
+					"Unable to authenticate with server\nProgram will now terminate", 
+					"Authentication unsuccessful", JOptionPane.ERROR_MESSAGE);
+			System.exit(1);
+		}
 	}
 	
 	public static boolean isIP(String ip) {
