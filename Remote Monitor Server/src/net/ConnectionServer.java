@@ -1,19 +1,19 @@
 package net;
 
+import head.RemoteMonitorServer;
+
 import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
 public class ConnectionServer {
 
-	ArrayList<Connection> clients;
+	private ArrayList<Connection> clients;
 
 	public ConnectionServer(String hash, int port) throws IOException {
 
@@ -21,6 +21,7 @@ public class ConnectionServer {
 		clients = new ArrayList<Connection>();
 
 		// Set up TCP listener
+		@SuppressWarnings("resource")
 		ServerSocket connListener = new ServerSocket(port);
 		while (true) {
 
@@ -34,6 +35,13 @@ public class ConnectionServer {
 			clients.add(connection);
 			System.out.println("NEW CONNECTION ESTABLISHED: " + connection.getAddress());
 		}
+	}
+	
+	public ArrayList<InetAddress> getConnectionList() {
+		ArrayList<InetAddress> connectionList = new ArrayList<InetAddress>();
+		for (Connection connection : clients)
+			connectionList.add(connection.getInetAddress());
+		return connectionList;
 	}
 
 	private class Connection implements Runnable {
@@ -58,9 +66,11 @@ public class ConnectionServer {
 		}
 
 		public String getAddress() {return clientAddress;}
+		public String getHostName() {return clientHostName;}
+		public InetAddress getInetAddress() {return connection.getInetAddress();} 
 
 		@Override
-		public void run() { 
+		public void run() {
 			
 			// Listens for the authentication packet
 			while (true) {
@@ -119,7 +129,11 @@ public class ConnectionServer {
 				return;
 			}
 			
+			// Updates the client list in the GUI
+			RemoteMonitorServer.updateClientList();
+			
 		}
+		
 	}
 
 }

@@ -4,7 +4,7 @@ import javax.swing.JFrame;
 
 public class ServerFrame extends JFrame {
 
-	public ServerPanel mainPanel;
+	private ServerPanel mainPanel;
 	
 	protected static final int WINDOW_HEIGHT = 700;
 	protected static final int WINDOW_WIDTH = 1200;
@@ -22,4 +22,6 @@ public class ServerFrame extends JFrame {
 		setResizable(false);
 		setVisible(true);
 	}
+	
+	public void updateList() {mainPanel.updateList();}
 }

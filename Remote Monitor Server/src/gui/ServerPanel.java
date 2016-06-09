@@ -1,17 +1,25 @@
 package gui;
 
+import head.RemoteMonitorServer;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
+import java.net.InetAddress;
+import java.util.ArrayList;
 
+import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 
 public class ServerPanel extends JPanel {
 	
-	public JList clientList;
-	public SidePanel sidePanel;
+	private JScrollPane clientListScroll;
+	private JList clientList;
+	private DefaultListModel listModel;
+	private SidePanel sidePanel;
 	
 	protected static final int LIST_WIDTH = 300;
 
@@ -21,14 +29,22 @@ public class ServerPanel extends JPanel {
 		setLayout(null);
 		
 		clientList = new JList();
+		clientListScroll = new JScrollPane(clientList);
 		sidePanel = new SidePanel(new String[] {"Run the client stub on a target computer to connect!", 
 				"Once connected, right click on any entry in the list to the left to execute various functions"});
 		
-		clientList.setBounds(15, 15, LIST_WIDTH, ServerFrame.WINDOW_HEIGHT - 15);
+		clientListScroll.setBounds(15, 15, LIST_WIDTH, ServerFrame.WINDOW_HEIGHT - 15);
 		sidePanel.setBounds(LIST_WIDTH + 30, 15, ServerFrame.WINDOW_WIDTH - (45 + LIST_WIDTH), ServerFrame.WINDOW_HEIGHT - 15);
 		
-		add(clientList);
+		add(clientListScroll);
 		add(sidePanel);
+	}
+	
+	public void updateList() {
+		
+		// Gets list of connected clients
+		ArrayList<InetAddress> connections = RemoteMonitorServer.clientServer.getConnectionList();
+		
 	}
 	
 	public void setSidePanel(String[] s) {
@@ -38,7 +54,6 @@ public class ServerPanel extends JPanel {
 		
 		revalidate();
 		repaint();
-		System.out.println("TEEEESTs");
 	}
 	public void setSidePanel(BufferedImage i) {
 		sidePanel = new SidePanel(i);

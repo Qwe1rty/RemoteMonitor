@@ -15,7 +15,8 @@ import net.ConnectionServer;
 public class RemoteMonitorServer {
 
 	public static final int PORT = 60922;
-
+	
+	public static ConnectionServer clientServer;
 	public static ServerFrame frame;
 	public static String key;
 
@@ -48,9 +49,11 @@ public class RemoteMonitorServer {
 
 		// Sets up authentication listener. Main thread will be listening for new connections
 		// until program is closed
-		ConnectionServer clientServer = new ConnectionServer(key, PORT);
+		clientServer = new ConnectionServer(key, PORT);
 	}
 
+	public static void updateClientList() {frame.updateList();}
+	
 	/**
 	 * Generates an SHA1 hash given an input key
 	 * 
