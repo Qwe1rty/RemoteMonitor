@@ -17,7 +17,7 @@ public class RemoteMonitorClient {
 	public static final int AUTH_TIMEOUT = 10; // default is 15, for 15 secs
 	
 	private static InetAddress serverIP;
-	private static String key;
+	private static String hash;
 
 	public static void main(String[] args) throws NoSuchAlgorithmException, IOException {
 
@@ -53,7 +53,7 @@ public class RemoteMonitorClient {
 			// Otherwise generate hash
 			if (seed == null) System.exit(0);
 			else if (seed.length() >= 8) {
-				key = generateHash(seed);
+				hash = generateHash(seed);
 				break;
 			} else firstInput = false;
 		} while (true);
@@ -73,20 +73,18 @@ public class RemoteMonitorClient {
 			// If the person added a colon (for port), remove it
 			if (serverIP.indexOf(":") != -1)
 				serverIP = serverIP.substring(0, serverIP.indexOf(":"));
-			
+
 			// Check if entered IP is valid. If so, keep it
 			else if (isIP(serverIP)) {
 				RemoteMonitorClient.serverIP = InetAddress.getByName(serverIP);
 				break;
 			} else firstInput = false;
 		} while (true);
-		
-		// Send authentication packet to server
+
+		// Try connecting with server
 		try {
-			if (Connection.establishConnection(serverIP, PORT)) {
-					
-			} else // If the authentication was not successful
-				throw new Exception("nope");
+			Connection connection = new Connection(serverIP, PORT, hash);
+			connection.listen();
 			
 		} catch (Exception e) { // If anything goes wrong, inform user of failure 
 			e.printStackTrace();
@@ -98,6 +96,9 @@ public class RemoteMonitorClient {
 	}
 	
 	public static boolean isIP(String ip) {
+		// If localhost
+		if (ip.equals("localhost")) return true;
+		
 		// Check if there are 4 elements that are separated by spaces
 		String[] ips = ip.split("\\.");
 		if (ips.length != 4) return false;
