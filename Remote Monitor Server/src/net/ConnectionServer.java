@@ -15,11 +15,24 @@ public class ConnectionServer {
 
 	private ArrayList<Connection> clients;
 
+	/**
+	 * Initializes the client list. Server will not be initialized, and should be
+	 * done through intitializeServer()
+	 * @throws IOException
+	 */
 	public ConnectionServer() throws IOException {
 		// Initialize client list
 		clients = new ArrayList<Connection>();
 	}
 
+	/**
+	 * Initializes the server. Once initializes, program will accept incoming
+	 * TCP socket connections from clients. Authentication will occur in a new thread
+	 * 
+	 * @param hash Authentication hash to confirm connection
+	 * @param port TCP connection port 
+	 * @throws IOException
+	 */
 	public void initializeServer(String hash, int port) throws IOException {
 		// Set up TCP listener
 		@SuppressWarnings("resource")
@@ -38,6 +51,24 @@ public class ConnectionServer {
 		}
 	}
 
+	/**
+	 * Sends a request to a specific client computer. If there is an operation that
+	 * is progress, it will be cancelled
+	 * @param client The IP address of the target computer
+	 * @param header The header request to be made to the computer
+	 */
+	public synchronized void requestOperation(InetAddress client, String header) {
+		
+		// Clears all running thread operations
+		for (int i = 0; i < clients.size(); i++)
+			if (clients.get(i).isOperationRunning()) clients.get(i).killOperation();
+		
+		// Finds the requested thread
+		for (int i = 0; i < clients.size(); i++) {
+			if (clients.get(i))
+		}
+	}
+	
 	/**
 	 * Returns a list of all connected computers
 	 * @return List of the IP addresses of all connected clients
@@ -58,7 +89,16 @@ public class ConnectionServer {
 
 		private InputStreamReader input;
 		private DataOutputStream output;
+		
+		private Thread operation;
 
+		/**
+		 * Initializes the connection with the client. Authentication and communication
+		 * will not occur here, but must be run through a new thread
+		 * @param connection Socket connection with client
+		 * @param hash Client authentication hash
+		 * @throws IOException
+		 */
 		public Connection(Socket connection, String hash) throws IOException {
 			this.connection = connection;
 			this.clientAddress = this.connection.getInetAddress().getHostAddress();
@@ -74,6 +114,38 @@ public class ConnectionServer {
 		public String getHostName() {return clientHostName;}
 		public InetAddress getInetAddress() {return connection.getInetAddress();} 
 
+		/**
+		 * Requests a client operation. If there is one in progress, it will be killed
+		 * @param header
+		 */
+		public void requestOperation(String header) {
+			if (operation != null)
+				killOperation();
+			
+			if (header.equals(PacketHeader.KEYL)) {
+				
+			} else if (header.equals(PacketHeader.PICT)) {
+				
+			} else if (header.equals(PacketHeader.KILL)) {
+				
+			}
+		}
+		
+		public boolean isOperationRunning() {
+			if (operation == null || operation.isInterrupted()) return false;
+			else return true;
+		}
+		
+		/**
+		 * Stops the current operation if there is one
+		 */
+		public void killOperation() {
+			if (operation != null) {
+				operation.interrupt();
+				operation = null;
+			}
+		}
+		
 		@Override
 		public void run() {
 
