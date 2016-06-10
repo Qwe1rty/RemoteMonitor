@@ -2,30 +2,33 @@ package gui;
 
 import head.RemoteMonitorServer;
 
-import java.awt.Color;
-import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.image.BufferedImage;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JList;
+import javax.swing.JMenuItem;
 import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.ListCellRenderer;
 
 public class ServerPanel extends JPanel {
 	
+	// List
+	protected static final int LIST_WIDTH = 350;
 	private DefaultListModel<InetAddress> listModel;
 	private JList<InetAddress> clientList;
 	private JScrollPane clientListScroll;
+
+	// Popup menu
+	private JPopupMenu popupMenu;
+	private JMenuItem menuKeyl, menuPict, menuStop;
+	
+	// Side display panel
 	private SidePanel sidePanel;
 	
-	protected static final int LIST_WIDTH = 300;
-
 	public ServerPanel() throws UnknownHostException {
 		
 		// Setup panel settings
@@ -35,19 +38,25 @@ public class ServerPanel extends JPanel {
 		// Creates list components and settings
 		listModel = new DefaultListModel<InetAddress>();
 		clientList = new JList<InetAddress>(listModel);
-		clientList.setCellRenderer(new InetAddressRenderer());
+		clientList.setCellRenderer(new ClientListRenderer());
 		clientListScroll = new JScrollPane(clientList);
-		listModel.addElement(InetAddress.getLocalHost());
 		
-		// 
+		// Prepares the popup menu for when the user right clicks on an element
+		popupMenu = new JPopupMenu();
+		popupMenu.add(menuKeyl = new JMenuItem("Start key monitoring"));
+		popupMenu.add(menuPict = new JMenuItem("Request screen capture"));
+		popupMenu.add(new JPopupMenu.Separator());
+		popupMenu.add(menuStop = new JMenuItem("Terminate communications"));
+		
+		// Adds the side panel
 		sidePanel = new SidePanel(new String[] {"Run the client stub on a target computer to connect!", 
 				"Once connected, right click on any entry in the list to the left to execute various functions",
 				"",
 				"Your internal server IP is " + InetAddress.getLocalHost().getHostAddress() + ", with hostname " + InetAddress.getLocalHost().getHostName(),});
 		
+		// Adds all the components
 		clientListScroll.setBounds(15, 15, LIST_WIDTH, ServerFrame.WINDOW_HEIGHT - 15);
 		sidePanel.setBounds(LIST_WIDTH + 30, 15, ServerFrame.WINDOW_WIDTH - (45 + LIST_WIDTH), ServerFrame.WINDOW_HEIGHT - 15);
-		
 		add(clientListScroll);
 		add(sidePanel);
 	}
@@ -63,29 +72,6 @@ public class ServerPanel extends JPanel {
 		listModel.clear();
 		for (int i = 0; i < connections.size(); i++)
 			listModel.addElement(connections.get(i));
-	}
-	
-	/**
-	 * Custom renderer to display connected clients in a list 
-	 * @author Caleb Choi
-	 */
-	private class InetAddressRenderer implements ListCellRenderer<InetAddress> {
-		public InetAddressRenderer() {setOpaque(true);}
-		
-		@Override
-		public Component getListCellRendererComponent(JList<? extends InetAddress> list, InetAddress client, int index,
-				boolean isSelected, boolean cellHasFocus) {
-			
-			JTextArea textArea = new JTextArea(client.getHostName() + "\n" + client.getHostAddress());
-			if (isSelected) {
-				textArea.setBackground(Color.LIGHT_GRAY);
-				textArea.setForeground(list.getForeground());
-			} else {
-				textArea.setBackground(list.getBackground());
-				textArea.setForeground(list.getForeground());
-			}
-			return textArea;
-		}
 	}
 	
 //	private void paintComponent(Graphics g) {
