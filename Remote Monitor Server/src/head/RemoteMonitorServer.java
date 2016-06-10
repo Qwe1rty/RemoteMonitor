@@ -18,7 +18,7 @@ public class RemoteMonitorServer {
 	
 	public static ConnectionServer clientServer;
 	public static ServerFrame frame;
-	public static String key;
+	public static String hash;
 
 	public static void main(String[] args) throws IOException, HeadlessException, NoSuchAlgorithmException {
 
@@ -39,7 +39,7 @@ public class RemoteMonitorServer {
 			// Otherwise generate hash
 			if (seed == null) System.exit(0);
 			else if (seed.length() >= 8) {
-				key = generateHash(seed);
+				hash = generateHash(seed);
 				break;
 			} else firstInput = false;
 		} while (true);
@@ -49,7 +49,8 @@ public class RemoteMonitorServer {
 
 		// Sets up authentication listener. Main thread will be listening for new connections
 		// until program is closed
-		clientServer = new ConnectionServer(key, PORT);
+		clientServer = new ConnectionServer();
+		clientServer.initializeServer(hash, PORT);
 	}
 
 	public static void updateClientList() {frame.updateList();}

@@ -19,7 +19,7 @@ public class Connection {
 		input = new BufferedReader(new InputStreamReader(connection.getInputStream()));
 		output = new DataOutputStream(connection.getOutputStream());
 		output.flush();
-		Thread.sleep(2000);
+		Thread.sleep(1000);
 		
 		// Send auth packet
 		output.writeBytes(PacketHeader.AUTH + " " + hash + System.getProperty("line.separator")); 
@@ -33,7 +33,7 @@ public class Connection {
 				// Checks to see if connection response is valid
 				if (response[0].equals(PacketHeader.CONN)) {
 					if (response[1].equals(hash)) {
-						System.out.println("SERVER RESPONSE OK");
+						System.out.println("SERVER RESPONSE RECEIVED");
 						break;
 					} else {
 						System.out.println("ERROR: RESPONSE HASH MISMATCH");

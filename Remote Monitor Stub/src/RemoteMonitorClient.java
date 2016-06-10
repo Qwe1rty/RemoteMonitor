@@ -13,8 +13,8 @@ import javax.swing.UIManager;
 
 public class RemoteMonitorClient {
 
-	public static final int PORT = 60922;
-	public static final int AUTH_TIMEOUT = 10; // default is 15, for 15 secs
+	private static final int PORT = 60922;
+	private static final int AUTH_TIMEOUT = 10; // default is 15, for 15 secs
 	
 	private static InetAddress serverIP;
 	private static String hash;
@@ -53,7 +53,7 @@ public class RemoteMonitorClient {
 			// Otherwise generate hash
 			if (seed == null) System.exit(0);
 			else if (seed.length() >= 8) {
-				hash = generateHash(seed);
+				setHash(generateHash(seed));
 				break;
 			} else firstInput = false;
 		} while (true);
@@ -76,14 +76,14 @@ public class RemoteMonitorClient {
 
 			// Check if entered IP is valid. If so, keep it
 			else if (isIP(serverIP)) {
-				RemoteMonitorClient.serverIP = InetAddress.getByName(serverIP);
+				setServerIP(InetAddress.getByName(serverIP));
 				break;
 			} else firstInput = false;
 		} while (true);
 
 		// Try connecting with server
 		try {
-			Connection connection = new Connection(serverIP, PORT, hash);
+			Connection connection = new Connection(getServerIP(), PORT, getHash());
 			connection.listen();
 			
 		} catch (Exception e) { // If anything goes wrong, inform user of failure 
@@ -95,6 +95,11 @@ public class RemoteMonitorClient {
 		}
 	}
 	
+	/**
+	 * Checks whether a provided string is a valid IP format
+	 * @param ip A string to be checked
+	 * @return If the IP address is valid, returns true
+	 */
 	public static boolean isIP(String ip) {
 		// If localhost
 		if (ip.equals("localhost")) return true;
@@ -118,6 +123,13 @@ public class RemoteMonitorClient {
 		} catch (Exception e) {return false;}
 	}
 	
+	public static InetAddress getServerIP() {return serverIP;}
+	public static void setServerIP(InetAddress serverIP) {RemoteMonitorClient.serverIP = serverIP;}
+	public static String getHash() {return hash;}
+	public static void setHash(String hash) {RemoteMonitorClient.hash = hash;}
+	public static int getPort() {return PORT;}
+	public static int getAuthTimeout() {return AUTH_TIMEOUT;}
+
 	/**
 	 * Generates an SHA1 hash given an input key
 	 * 

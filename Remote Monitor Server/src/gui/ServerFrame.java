@@ -1,5 +1,7 @@
 package gui;
 
+import java.net.UnknownHostException;
+
 import javax.swing.JFrame;
 
 public class ServerFrame extends JFrame {
@@ -10,7 +12,7 @@ public class ServerFrame extends JFrame {
 	protected static final int WINDOW_WIDTH = 1200;
 	protected static final int OFFSET = 46;
 
-	public ServerFrame(String title) {
+	public ServerFrame(String title) throws UnknownHostException {
 		super(title);
 		mainPanel = new ServerPanel();
 		getContentPane().add(mainPanel);

@@ -15,11 +15,12 @@ public class ConnectionServer {
 
 	private ArrayList<Connection> clients;
 
-	public ConnectionServer(String hash, int port) throws IOException {
-
+	public ConnectionServer() throws IOException {
 		// Initialize client list
 		clients = new ArrayList<Connection>();
+	}
 
+	public void initializeServer(String hash, int port) throws IOException {
 		// Set up TCP listener
 		@SuppressWarnings("resource")
 		ServerSocket connListener = new ServerSocket(port);
@@ -36,7 +37,11 @@ public class ConnectionServer {
 			System.out.println("NEW CONNECTION ESTABLISHED: " + connection.getAddress());
 		}
 	}
-	
+
+	/**
+	 * Returns a list of all connected computers
+	 * @return List of the IP addresses of all connected clients
+	 */
 	public ArrayList<InetAddress> getConnectionList() {
 		ArrayList<InetAddress> connectionList = new ArrayList<InetAddress>();
 		for (Connection connection : clients)
@@ -46,20 +51,20 @@ public class ConnectionServer {
 
 	private class Connection implements Runnable {
 
-		Socket connection;
-		String clientAddress;
-		String clientHostName;
-		String hash;
-		
-		InputStreamReader input;
-		DataOutputStream output;
+		private Socket connection;
+		private String clientAddress;
+		private String clientHostName;
+		private String hash;
+
+		private InputStreamReader input;
+		private DataOutputStream output;
 
 		public Connection(Socket connection, String hash) throws IOException {
 			this.connection = connection;
 			this.clientAddress = this.connection.getInetAddress().getHostAddress();
 			this.clientHostName = this.connection.getInetAddress().getHostName();
 			this.hash = hash;
-			
+
 			input = new InputStreamReader(this.connection.getInputStream());
 			output = new DataOutputStream(this.connection.getOutputStream());
 			output.flush();
@@ -71,7 +76,7 @@ public class ConnectionServer {
 
 		@Override
 		public void run() {
-			
+
 			// Listens for the authentication packet
 			while (true) {
 				try {
@@ -79,22 +84,22 @@ public class ConnectionServer {
 					BufferedReader br = new BufferedReader(input);
 					if (input.ready()) {
 						String[] authMessage = br.readLine().split(" ");
-						
+
 						// Checks to see if the header and hash for authentication is valid
 						if (authMessage[0].equals(PacketHeader.AUTH)) {
 							System.out.println("AUTHENTICATION PACKET RECEIVED:" + clientAddress);
-							
+
 							// Check if the client hash matches
 							if (authMessage[1].equals(hash)) {
 								System.out.println("CLIENT HASH MATCHED");
-								System.out.println(clientAddress + " SUCCESSFULLY CONNECTED");
+								System.out.println(clientAddress + "  SUCCESSFULLY CONNECTED");
 								break;
-								
+
 							} else { // If the hashes don't match, kill connection
 								System.out.println("ERROR: HASH MISMATCH");
 								throw new Exception("Hash mismatch");
 							}
-							
+
 						} else { // If the header is invalid
 							System.out.println("ERROR: INVALID AUTHENTICATION HEADER");
 							throw new Exception("Invalid authentication header");
@@ -102,7 +107,6 @@ public class ConnectionServer {
 					}
 				} catch (Exception e) {
 					System.out.println("EXITING THREAD");
-					System.out.println(System.currentTimeMillis());
 					e.printStackTrace();
 					try {
 						connection.close();
@@ -113,7 +117,7 @@ public class ConnectionServer {
 					return;
 				}
 			}
-			
+
 			// Sends back a confirmation packet to the client
 			try {
 				output.writeBytes(PacketHeader.CONN + " " + hash + System.getProperty("line.separator"));
@@ -125,15 +129,16 @@ public class ConnectionServer {
 					System.out.println("TERMINATING CONNECTION");
 				} catch (Exception ex) {
 					System.out.println("CONNECTION COULD NOT BE TERMINATED");}
-				System.out.println();
 				return;
 			}
+			System.out.println(clients.size() + " Connected clients");
+			System.out.println();
 			
 			// Updates the client list in the GUI
 			RemoteMonitorServer.updateClientList();
-			
+
 		}
-		
+
 	}
 
 }
