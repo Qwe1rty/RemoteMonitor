@@ -5,15 +5,24 @@ import java.awt.HeadlessException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
+import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
 import net.ConnectionServer;
 
+/**
+ * This program will monitor various computers within a Local Area Network.
+ * The main class will run the program, and it contains random various methods
+ * that are used throughout the application and don't belong anywhere else
+ *  
+ * @author Caleb Choi
+ */
 public class RemoteMonitorServer {
 
 	private static final int PORT = 60922;
@@ -22,12 +31,26 @@ public class RemoteMonitorServer {
 	private static ServerFrame frame;
 	private static String hash;
 
-	public static void main(String[] args) throws IOException, HeadlessException, NoSuchAlgorithmException {
+	public static void main(String[] args) 
+			throws HeadlessException, NoSuchAlgorithmException, UnsupportedEncodingException, UnknownHostException {
 
 		// Greatest line of code of all time 
 		try {UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());} catch (Exception e) {}
 
 		// Shows the warning message not to use this program in a dumb manner
+		int warningResponse = JOptionPane.showConfirmDialog(null, 
+				"This program will have the ability to record and save keyboard and screen"
+						+ System.getProperty("line.separator")
+						+ "from another computer. Misuse of this program can be considered a federal"
+						+ System.getProperty("line.separator")
+						+ "crime and can be punished severely. Only use this program with the"
+						+ System.getProperty("line.separator")
+						+ "expressed consent of the client computer's owner(s)."
+						+ System.getProperty("line.separator")
+						+ System.getProperty("line.separator")
+						+ "Are you sure you would like to proceed?",
+						"Program usage warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+		if (warningResponse != 0) System.exit(0);
 
 		// Prompts user to enter a key and generates hash
 		boolean firstInput = true;
@@ -50,7 +73,7 @@ public class RemoteMonitorServer {
 					JOptionPane.showMessageDialog(null,
 							"Program was unable to generate hash from entered key"
 									+ System.getProperty("line.separator")
-									+ "Remote monitor client will now terminate"
+									+ "Remote monitor server will now terminate"
 									, "Program error", JOptionPane.ERROR_MESSAGE);
 					System.exit(0);
 				}
@@ -64,7 +87,24 @@ public class RemoteMonitorServer {
 		// Sets up authentication listener. Main thread will be listening for new connections
 		// until program is closed
 		clientServer = new ConnectionServer();
-		clientServer.initializeServer(hash, PORT);
+		try {clientServer.initializeServer(hash, PORT);}
+		catch (IOException e) { // If something goes wrong
+
+			System.out.println("SERVER SOCKET ERROR");
+			e.printStackTrace();
+
+			// Try to close down all the sockets
+			clientServer.shutdown();
+
+			// Notify user that something went wrong
+			JOptionPane.showMessageDialog(null, 
+					"An unexpected connectivity error occured in the server socket"
+							+ System.getProperty("line.separator")
+							+ "Program will now exit. Please restart the program to try again", 
+							"Unexpected error", JOptionPane.ERROR_MESSAGE);
+			System.exit(3);
+		}
+
 	}
 
 	/**
@@ -87,6 +127,18 @@ public class RemoteMonitorServer {
 		for (int i = 0; i < digest.length; i++)
 			hexStr +=  Integer.toString((digest[i] & 0xff) + 0x100, 16).substring(1);
 		return hexStr;
+	}
+	
+	/**
+	 * Displays a dialog to the user that a certain connection has been lost
+	 * @param connection IP address of the disconnected client
+	 */
+	public static void displayConnectionCutDialog(InetAddress connection) {
+		JOptionPane.showMessageDialog(null, 
+				"The connection with " + connection.getHostAddress() + " has been lost."
+				+ System.getProperty("line.separator")
+				+ "This client will be removed from the server."
+				, "Connection lost", JOptionPane.INFORMATION_MESSAGE);
 	}
 
 	// The following are all basically wrapper methods for the private fields

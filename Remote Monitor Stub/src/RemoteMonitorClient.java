@@ -37,7 +37,7 @@ public class RemoteMonitorClient {
 				+ System.getProperty("line.separator")
 				+ "If you are unsure whether to proceed, DO NOT continue.",
 				"Program consent", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-		if (consentResponse == 0) System.exit(0);
+		if (consentResponse != 0) System.exit(0);
 		
 		// Prompts user to enter a key and generates hash
 		boolean firstInput = true;

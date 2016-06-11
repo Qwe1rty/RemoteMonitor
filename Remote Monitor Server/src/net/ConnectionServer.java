@@ -11,16 +11,20 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 
+/**
+ * The server for all client connections. Manages and maintains requests
+ * @author Caleb Choi
+ */
 public class ConnectionServer {
 
 	private ArrayList<Connection> clients;
+	private ServerSocket connListener;
 
 	/**
 	 * Initializes the client list. Server will not be initialized, and should be
 	 * done through intitializeServer()
-	 * @throws IOException
 	 */
-	public ConnectionServer() throws IOException {
+	public ConnectionServer() {
 		// Initialize client list
 		clients = new ArrayList<Connection>();
 	}
@@ -35,8 +39,7 @@ public class ConnectionServer {
 	 */
 	public void initializeServer(String hash, int port) throws IOException {
 		// Set up TCP listener
-		@SuppressWarnings("resource")
-		ServerSocket connListener = new ServerSocket(port);
+		this.connListener = new ServerSocket(port);
 		while (true) {
 
 			// Listens indefinitely for clients
@@ -47,19 +50,45 @@ public class ConnectionServer {
 			Thread clientThread = new Thread(connection);
 			clientThread.start();
 			clients.add(connection);
-			System.out.println("NEW CONNECTION ESTABLISHED: " + connection.getAddress());
+			System.out.println("NEW UNAUTHENTICATED CONNECTION: " + connection.getAddress());
 		}
 	}
-
-	public synchronized void removeConnection(InetAddress client) {
-		// Finds the selected client and removes it
-		for (int i = 0; i < clients.size(); i++)
-			if (clients.get(i).getAddress().equals(client.getAddress())) {
-				clients.remove(i);
-				return;
-			}
-	}
 	
+	/**
+	 * Returns a list of all connected computers
+	 * @return List of the IP addresses of all connected clients
+	 */
+	public ArrayList<InetAddress> getConnectionList() {
+		ArrayList<InetAddress> connectionList = new ArrayList<InetAddress>();
+		for (Connection connection : clients)
+			connectionList.add(connection.getInetAddress());
+		return connectionList;
+	}
+
+	/**
+	 * Deletes a client off of the client list. This will not cut connections between
+	 * the client, as that is done through requestOperation() in Connection.
+	 * The GUI will also updated along the way
+	 * 
+	 * @param client The IP address of the client to remove
+	 * @return True if a connection was successfully removed, false if no connection
+	 * was removed or something went wrong
+	 */
+	public synchronized boolean removeConnection(InetAddress client) {
+		
+		// Finds the selected client and removes it and returns true
+		for (int i = 0; i < clients.size(); i++) {
+			if (clients.get(i).getAddress().equals(client.getHostAddress())) {
+				clients.remove(i);
+				RemoteMonitorServer.updateClientList();
+				return true;
+			}
+		}
+		
+		// Returns false if nothing happened
+		return false;
+	}
+
 	/**
 	 * Sends a request to a specific client computer. If there is an operation that
 	 * is progress, it will be cancelled
@@ -70,8 +99,11 @@ public class ConnectionServer {
 
 		// Clears all running thread operations
 		for (int i = 0; i < clients.size(); i++)
-			if (clients.get(i).isOperationRunning()) clients.get(i).killOperation();
+			clients.get(i).killOperation();
 
+		// Pause for a quick moment so the threads can die
+		try {Thread.sleep(200);} catch (Exception e) {}
+		
 		// Finds the requested thread
 		for (int i = 0; i < clients.size(); i++)
 			if (clients.get(i).getAddress().equals(client.getHostAddress())) {
@@ -81,14 +113,22 @@ public class ConnectionServer {
 	}
 
 	/**
-	 * Returns a list of all connected computers
-	 * @return List of the IP addresses of all connected clients
+	 * Attempts to shut down all connections, including the server socket and every
+	 * single individual client connection. There is no guarantee that every single
+	 * connection will successfully be closed
 	 */
-	public ArrayList<InetAddress> getConnectionList() {
-		ArrayList<InetAddress> connectionList = new ArrayList<InetAddress>();
-		for (Connection connection : clients)
-			connectionList.add(connection.getInetAddress());
-		return connectionList;
+	public synchronized void shutdown() {
+		
+		// Iterates through every client and shuts them down
+		for (int i = 0; i < clients.size(); i++)
+			clients.get(i).shutdown();
+		
+		// Try to shut down server socket
+		try {connListener.close();} 
+		catch (IOException e) {
+			System.out.println("SERVER SOCKET COULD NOT BE CLOSED");
+			e.printStackTrace();
+		}
 	}
 
 	/**
@@ -125,15 +165,63 @@ public class ConnectionServer {
 			output.flush();
 		}
 
+		/**
+		 * Returns the raw IP address of the connection in textual form
+		 * @return IP address of the connection
+		 */
 		public String getAddress() {return clientAddress;}
+		
+		/**
+		 * Returns the host name of the connected computer
+		 * @return Host name of the connected computer
+		 */
 		public String getHostName() {return clientHostName;}
+		
+		/**
+		 * Returns the IP address of the connection as an InetAddress
+		 * @return IP address of the connection
+		 */
 		public InetAddress getInetAddress() {return connection.getInetAddress();} 
 
 		/**
-		 * Requests a client operation. If there is one in progress, it will be killed
-		 * @param header
+		 * Stops the current operation if there is one
+		 */
+		public void killOperation() {
+			if (operation != null && !operation.isInterrupted()) {
+				operation.interrupt();
+				operation = null;
+			}
+		}
+		
+		/**
+		 * Shuts down the connection to the client. Note that the client will not
+		 * receive any forewarning, and the user will not be informed of any dialog
+		 * that the connection has been cut
+		 */
+		public void shutdown() {
+			killOperation(); // Stops whatever they were doing
+			System.out.println("CLIENT " + getAddress() + " DISCONNECTED");
+			
+			// Will try to close all output streams
+			try { 
+				input.close();
+				output.close();
+				connection.close();
+				System.out.println("CLOSING CLIENT " + getAddress() + " CONNECTIONS");
+			} catch (IOException e1) {System.out.println("CLIENT CONNECTION COULD NOT BE CLOSED");}
+
+			// Removes connection from the server list
+			System.out.println("REMOVE CONNECTION RESULT: " + removeConnection(connection.getInetAddress()));
+		}
+		
+		/**
+		 * Requests a client operation. If there is one in progress, the thread will be
+		 * interrupted and cleared
+		 * @param header Packet header to be sent
 		 */
 		public void requestOperation(final String header) {
+			
+			// Kills any currently running operation
 			if (operation != null)
 				killOperation();
 
@@ -154,24 +242,18 @@ public class ConnectionServer {
 									// TODO add keystroke to GUI
 								}
 							}
-							
+
 							// Once thread is interrupted, send message to client to stop recording keystrokes
 							output.writeBytes(header + System.getProperty("line.separator"));
-							
+
 						} catch (IOException e) { // IOException means the client disconnected
-							System.out.println("CLIENT " + connection.getInetAddress().getHostAddress() + " DISCONNECTED");
-							try { // Will try to close all output streams
-								input.close();
-								output.close();
-								connection.close();
-								System.out.println("CLOSING CLIENT CONNECTION");
-							} catch (IOException e1) {System.out.println("CLIENT CONNECTION COULD NOT BE CLOSED");}
-							removeConnection(connection.getInetAddress());
+							shutdown(); 
+							RemoteMonitorServer.displayConnectionCutDialog(connection.getInetAddress());
 						}
 					}
 				});
 				operation.start();
-				
+
 			} else if (header.equals(PacketHeader.PICT)) { // Tells client to send a screencap over
 				operation = new Thread(new Runnable() {
 					@Override
@@ -184,56 +266,21 @@ public class ConnectionServer {
 
 							}
 						} catch (IOException e) { // IOException means the client disconnected
-							System.out.println("CLIENT " + connection.getInetAddress().getHostAddress() + " DISCONNECTED");
-							try { // Will try to close all output streams
-								input.close();
-								output.close();
-								connection.close();
-								System.out.println("CLOSING CLIENT CONNECTION");
-							} catch (IOException e1) {System.out.println("CLIENT CONNECTION COULD NOT BE CLOSED");}
-							removeConnection(connection.getInetAddress());
+							shutdown(); 
+							RemoteMonitorServer.displayConnectionCutDialog(connection.getInetAddress());
 						}
 					}
 				});
 				operation.start();
-				
+
 			} else if (header.equals(PacketHeader.KILL)) { // Tells client to terminate its existence
-				
+
 				// Try to send a kill request to client
 				try {output.writeBytes(header + System.getProperty("line.separator"));} 
 				catch (IOException e) {System.out.println("KILL REQUEST WAS UNABLE TO BE SENT");}
+				finally {shutdown();} // Regardless of whether the kill request was able to be sent, server closes client
 				
-				finally { // Regardless of whether the kill request was able to be sent, server closes client
-					System.out.println("CLIENT " + connection.getInetAddress().getHostAddress() + " DISCONNECTED");
-					try { // Will try to close all output streams
-						input.close();
-						output.close();
-						connection.close();
-						System.out.println("CLOSING CLIENT CONNECTION");
-					} catch (IOException e1) {System.out.println("CLIENT CONNECTION COULD NOT BE CLOSED");}
-					
-					// Removes connection from the 
-					removeConnection(connection.getInetAddress());
-				}
 			} else System.out.println("INVALID REQUEST HEADER - IGNORING REQUEST TO " + getAddress());
-		}
-
-		/**
-		 * Returns a boolean indicating whether an operation is currently running
-		 * @return Boolean representing the state of an operation
-		 */
-		public boolean isOperationRunning() {
-			return !(operation == null || operation.isInterrupted());
-		}
-
-		/**
-		 * Stops the current operation if there is one
-		 */
-		public void killOperation() {
-			if (operation != null) {
-				operation.interrupt();
-				operation = null;
-			}
 		}
 
 		@Override
@@ -271,7 +318,7 @@ public class ConnectionServer {
 					System.out.println("EXITING THREAD");
 					e.printStackTrace();
 					try {
-						connection.close();
+						shutdown();
 						System.out.println("CONNECTION TERMINATED");
 					} catch (Exception ex) {
 						System.out.println("CONNECTION COULD NOT BE TERMINATED");}
@@ -286,7 +333,7 @@ public class ConnectionServer {
 			} catch (IOException e) {
 				System.out.println("CONFIRMATION PACKET COULD NOT BE SENT");
 				try {
-					connection.close();
+					shutdown();
 					System.out.println("TERMINATING CONNECTION");
 				} catch (Exception ex) {
 					System.out.println("CONNECTION COULD NOT BE TERMINATED");}
@@ -296,9 +343,6 @@ public class ConnectionServer {
 
 			// Updates the client list in the GUI
 			RemoteMonitorServer.updateClientList();
-
 		}
-
 	}
-
 }
