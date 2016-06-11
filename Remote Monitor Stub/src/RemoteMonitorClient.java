@@ -36,8 +36,8 @@ public class RemoteMonitorClient {
 				+ System.getProperty("line.separator")
 				+ System.getProperty("line.separator")
 				+ "If you are unsure whether to proceed, DO NOT continue.",
-				"Program consent", JOptionPane.YES_NO_OPTION);
-		if (consentResponse == 1) System.exit(0);
+				"Program consent", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+		if (consentResponse == 0) System.exit(0);
 		
 		// Prompts user to enter a key and generates hash
 		boolean firstInput = true;
@@ -45,8 +45,12 @@ public class RemoteMonitorClient {
 			String seed;
 			
 			// Show input dialog
-			if (firstInput) seed = JOptionPane.showInputDialog(null, "Enter an authentication key\nIt must be 8 characters or longer"); 
-			else seed = JOptionPane.showInputDialog(null, "That is an invalid key! Try again\nEnter an authentication key\nIt must be 8 characters or longer");
+			if (firstInput) seed = JOptionPane.showInputDialog(null, 
+					"Enter an authentication key\nIt must be 8 characters or longer",
+					"Program Input", JOptionPane.QUESTION_MESSAGE);
+			else seed = JOptionPane.showInputDialog(null, 
+					"That is an invalid key! Try again\nEnter an authentication key\nIt must be 8 characters or longer",
+					"Program Input", JOptionPane.QUESTION_MESSAGE);
 
 			// If user clicked cancel or red X, exit program
 			// If string is less than 8 chars long, retry
@@ -64,8 +68,12 @@ public class RemoteMonitorClient {
 			String serverIP;
 			
 			// Show input dialog
-			if (firstInput) serverIP = JOptionPane.showInputDialog(null, "Enter the server IP address\nPort is automatically assigned"); 
-			else serverIP = JOptionPane.showInputDialog(null, "That is an invalid address! Try again!\nEnter the server IP address\nPort is automatically assigned");
+			if (firstInput) serverIP = JOptionPane.showInputDialog(null, 
+					"Enter the server IP address\nPort is automatically assigned",
+					"Program Input", JOptionPane.QUESTION_MESSAGE);
+			else serverIP = JOptionPane.showInputDialog(null, 
+					"That is an invalid address! Try again!\nEnter the server IP address\nPort will be automatically assigned",
+					"Program Input", JOptionPane.QUESTION_MESSAGE);
 
 			// Exit if used clicked cancel or red X
 			if (serverIP == null) System.exit(0);
@@ -84,13 +92,41 @@ public class RemoteMonitorClient {
 		// Try connecting with server
 		try {
 			Connection connection = new Connection(getServerIP(), PORT, getHash());
-			connection.listen();
 			
-		} catch (Exception e) { // If anything goes wrong, inform user of failure 
+			// Connection will now listen for server requests
+			// Once the server sends a kill request, user is notified
+			try {
+				connection.listen();
+				JOptionPane.showMessageDialog(null, 
+						"Remote monitor client connection has been successfully terminated by the server " + serverIP.getHostAddress() + "."
+						+ System.getProperty("line.separator")
+						+ System.getProperty("line.separator")
+						+ "If you are unsure why you are seeing this message, please contact your system administrator"
+						+ System.getProperty("line.separator")
+						+ "immediately. There may have been unauthorized access to your computer and your personal data "
+						+ System.getProperty("line.separator")
+						+ "has potentially been stolen."
+						, "Connection Terminated", JOptionPane.INFORMATION_MESSAGE);
+				
+			} catch (IOException ie) { // If IOException is caught here, that means the client disconnected
+				JOptionPane.showMessageDialog(null, 
+						"Remote monitor connection has been unexpectedly disconnected from the server " + serverIP.getHostAddress() + "."
+						+ System.getProperty("line.separator")
+						+ System.getProperty("line.separator")
+						+ "If you are unsure why you are seeing this message, please contact your system administrator"
+						+ System.getProperty("line.separator")
+						+ "immediately. There may have been unauthorized access to your computer and your personal data "
+						+ System.getProperty("line.separator")
+						+ "has potentially been stolen."
+						, "Connection Terminated", JOptionPane.ERROR_MESSAGE);
+				System.exit(2);
+			}
+			
+		} catch (Exception e) { // If anything goes wrong with authentication, inform user of failure 
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(null, 
-					"Unable to authenticate with server\nProgram will now terminate", 
-					"Authentication unsuccessful", JOptionPane.ERROR_MESSAGE);
+					"Unable to authenticate with server. Program will now terminate" 
+					, "Authentication unsuccessful", JOptionPane.ERROR_MESSAGE);
 			System.exit(1);
 		}
 	}

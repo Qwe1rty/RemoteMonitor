@@ -4,8 +4,10 @@ import gui.ServerFrame;
 import java.awt.HeadlessException;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
@@ -14,16 +16,18 @@ import net.ConnectionServer;
 
 public class RemoteMonitorServer {
 
-	public static final int PORT = 60922;
-	
-	public static ConnectionServer clientServer;
-	public static ServerFrame frame;
-	public static String hash;
+	private static final int PORT = 60922;
+
+	private static ConnectionServer clientServer;
+	private static ServerFrame frame;
+	private static String hash;
 
 	public static void main(String[] args) throws IOException, HeadlessException, NoSuchAlgorithmException {
 
 		// Greatest line of code of all time 
 		try {UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());} catch (Exception e) {}
+
+		// Shows the warning message not to use this program in a dumb manner
 
 		// Prompts user to enter a key and generates hash
 		boolean firstInput = true;
@@ -39,7 +43,17 @@ public class RemoteMonitorServer {
 			// Otherwise generate hash
 			if (seed == null) System.exit(0);
 			else if (seed.length() >= 8) {
+
+				// Try to generate hash. If unable to (exception thrown), close program
 				hash = generateHash(seed);
+				if (hash == null) {
+					JOptionPane.showMessageDialog(null,
+							"Program was unable to generate hash from entered key"
+									+ System.getProperty("line.separator")
+									+ "Remote monitor client will now terminate"
+									, "Program error", JOptionPane.ERROR_MESSAGE);
+					System.exit(0);
+				}
 				break;
 			} else firstInput = false;
 		} while (true);
@@ -53,8 +67,6 @@ public class RemoteMonitorServer {
 		clientServer.initializeServer(hash, PORT);
 	}
 
-	public static void updateClientList() {frame.updateList();}
-	
 	/**
 	 * Generates an SHA1 hash given an input key
 	 * 
@@ -76,5 +88,26 @@ public class RemoteMonitorServer {
 			hexStr +=  Integer.toString((digest[i] & 0xff) + 0x100, 16).substring(1);
 		return hexStr;
 	}
+
+	// The following are all basically wrapper methods for the private fields
+
+	/**
+	 * Updates the GUI client list
+	 */
+	public static void updateClientList() {frame.updateList();}
+
+	/**
+	 * Returns the client server's connection list
+	 * @return ArrayList of all current active client connections
+	 */
+	public static ArrayList<InetAddress> getConnectionList() {return clientServer.getConnectionList();}
+
+	/**
+	 * Sends a request to the client server
+	 * @param client Client to sent request to
+	 * @param header Request header
+	 */
+	public static void requestOperation(InetAddress client, String header)
+	{clientServer.requestOperation(client, header);}
 
 }

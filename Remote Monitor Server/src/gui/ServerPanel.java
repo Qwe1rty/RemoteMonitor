@@ -19,6 +19,8 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
+import net.PacketHeader;
+
 public class ServerPanel extends JPanel implements ActionListener {
 	
 	// List
@@ -45,7 +47,7 @@ public class ServerPanel extends JPanel implements ActionListener {
 		clientList = new JList<InetAddress>(listModel);
 		clientList.setCellRenderer(new ClientListRenderer());
 		clientListScroll = new JScrollPane(clientList);
-		listModel.addElement(InetAddress.getLocalHost());
+//		listModel.addElement(InetAddress.getLocalHost());
 		
 		// Prepares the popup menu for when the user right clicks on an element
 		popupMenu = new JPopupMenu();
@@ -87,7 +89,7 @@ public class ServerPanel extends JPanel implements ActionListener {
 	 */
 	public void updateList() {
 		// Gets list of connected clients
-		ArrayList<InetAddress> connections = RemoteMonitorServer.clientServer.getConnectionList();
+		ArrayList<InetAddress> connections = RemoteMonitorServer.getConnectionList();
 		
 		// Removes all elements in current list, then adds current connections to it
 		listModel.clear();
@@ -97,14 +99,14 @@ public class ServerPanel extends JPanel implements ActionListener {
 
 	@Override
 	public void actionPerformed(ActionEvent e) {
-		if (e.getSource() == menuKeyl) {
-			System.out.println("memememes");
-		} else if (e.getSource() == menuPict) {
-			System.out.println("ASDASdasdasd");
-		} else if (e.getSource() == menuKill) {
-			System.out.println("qwyq38");
-		}
-		System.out.println(clientList.getSelectedValue().getHostAddress());
+
+		// Sends the appropriate request depending on what element of the popup the user selected
+		if (e.getSource() == menuKeyl)
+			RemoteMonitorServer.requestOperation(clientList.getSelectedValue(), PacketHeader.KEYL);
+		else if (e.getSource() == menuPict)
+			RemoteMonitorServer.requestOperation(clientList.getSelectedValue(), PacketHeader.PICT);
+		else if (e.getSource() == menuKill)
+			RemoteMonitorServer.requestOperation(clientList.getSelectedValue(), PacketHeader.KILL);
 	}
 	
 //	private void paintComponent(Graphics g) {
