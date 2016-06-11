@@ -9,7 +9,7 @@ public class ServerFrame extends JFrame {
 	private ServerPanel mainPanel;
 	
 	protected static final int WINDOW_HEIGHT = 700;
-	protected static final int WINDOW_WIDTH = 1200;
+	protected static final int WINDOW_WIDTH = 1400;
 	protected static final int OFFSET = 46;
 
 	public ServerFrame(String title) throws UnknownHostException {

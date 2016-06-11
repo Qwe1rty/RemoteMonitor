@@ -10,7 +10,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 
-import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
@@ -37,6 +36,17 @@ public class RemoteMonitorServer {
 		// Greatest line of code of all time 
 		try {UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());} catch (Exception e) {}
 
+		// Ensures that when program is closed, all sockets and connections are closed
+		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+			@Override
+			public void run() {
+				if (clientServer != null) {
+					System.out.println("CLOSING ALL SOCKET CONNECTIONS");
+					clientServer.shutdown();
+				} else System.out.println("CLOSING PROGRAM");
+			}
+		}));
+		
 		// Shows the warning message not to use this program in a dumb manner
 		int warningResponse = JOptionPane.showConfirmDialog(null, 
 				"This program will have the ability to record and save keyboard and screen"
@@ -93,9 +103,6 @@ public class RemoteMonitorServer {
 			System.out.println("SERVER SOCKET ERROR");
 			e.printStackTrace();
 
-			// Try to close down all the sockets
-			clientServer.shutdown();
-
 			// Notify user that something went wrong
 			JOptionPane.showMessageDialog(null, 
 					"An unexpected connectivity error occured in the server socket"
@@ -147,6 +154,28 @@ public class RemoteMonitorServer {
 	 * Updates the GUI client list
 	 */
 	public static void updateClientList() {frame.updateList();}
+	
+	/**
+	 * Tells the client server to remove all dead connections. A dialog box
+	 * will appear telling the user how many clients were removed
+	 */
+	public static void removeDeadConnections() {
+		JOptionPane.showMessageDialog(null, 
+				String.valueOf(clientServer.removeDeadConnections()) 
+				+ " dead connection(s) have been removed"
+				, "Operation result", JOptionPane.INFORMATION_MESSAGE);
+	}
+	
+	/**
+	 * Tells the client server to remove all client connections. A dialog box
+	 * will appear telling the user how many clients were terminated/removed
+	 */
+	public static void removeAllConnections() {
+		JOptionPane.showMessageDialog(null,
+				String.valueOf(clientServer.removeAllConnections())
+				+ " connection(s) have been removed"
+				, "Operation result", JOptionPane.INFORMATION_MESSAGE);
+	}
 
 	/**
 	 * Returns the client server's connection list

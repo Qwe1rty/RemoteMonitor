@@ -15,8 +15,9 @@ public class RemoteMonitorClient {
 
 	private static final int PORT = 60922;
 	private static final int AUTH_TIMEOUT = 10; // default is 15, for 15 secs
-	
+
 	private static InetAddress serverIP;
+	private static Connection connection;
 	private static String hash;
 
 	public static void main(String[] args) throws NoSuchAlgorithmException, IOException {
@@ -24,26 +25,37 @@ public class RemoteMonitorClient {
 		// Greatest line of code of all time 
 		try {UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());} catch (Exception e) {}
 
+		// Ensures that when program is closed, all sockets and connections are closed
+		Runtime.getRuntime().addShutdownHook(new Thread(new Runnable() {
+			@Override
+			public void run() {
+				if (connection != null) {
+					System.out.println("CLOSING ALL SOCKET CONNECTIONS");
+					connection.shutdown();
+				} else System.out.println("CLOSING PROGRAM");
+			}
+		}));
+
 		// Shows a consent prompt to ensure that the user is willfully allowing
 		// their computer to be monitored. Also, all the dialog boxes prevent someone
 		// from just silently running the stub without the owner's knowledge
 		int consentResponse = JOptionPane.showConfirmDialog(null, 
 				"Are you sure you would like to allow this program to send"
-				+ System.getProperty("line.separator")
-				+ "your keyboard input and screen feed to another computer?"
-				+ System.getProperty("line.separator")
-				+ "You will not be able to terminate the program via normal means."
-				+ System.getProperty("line.separator")
-				+ System.getProperty("line.separator")
-				+ "If you are unsure whether to proceed, DO NOT continue.",
-				"Program consent", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+						+ System.getProperty("line.separator")
+						+ "your keyboard input and screen feed to another computer?"
+						+ System.getProperty("line.separator")
+						+ "You will not be able to terminate the program via normal means."
+						+ System.getProperty("line.separator")
+						+ System.getProperty("line.separator")
+						+ "If you are unsure whether to proceed, DO NOT continue.",
+						"Program consent", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 		if (consentResponse != 0) System.exit(0);
-		
+
 		// Prompts user to enter a key and generates hash
 		boolean firstInput = true;
 		do {
 			String seed;
-			
+
 			// Show input dialog
 			if (firstInput) seed = JOptionPane.showInputDialog(null, 
 					"Enter an authentication key\nIt must be 8 characters or longer",
@@ -61,12 +73,12 @@ public class RemoteMonitorClient {
 				break;
 			} else firstInput = false;
 		} while (true);
-		
+
 		// Setup for packet sending
 		firstInput = true;
 		do {
 			String serverIP;
-			
+
 			// Show input dialog
 			if (firstInput) serverIP = JOptionPane.showInputDialog(null, 
 					"Enter the server IP address\nPort is automatically assigned",
@@ -77,7 +89,7 @@ public class RemoteMonitorClient {
 
 			// Exit if used clicked cancel or red X
 			if (serverIP == null) System.exit(0);
-			
+
 			// If the person added a colon (for port), remove it
 			if (serverIP.indexOf(":") != -1)
 				serverIP = serverIP.substring(0, serverIP.indexOf(":"));
@@ -91,37 +103,37 @@ public class RemoteMonitorClient {
 
 		// Try connecting with server
 		try {
-			Connection connection = new Connection(getServerIP(), PORT, getHash());
-			
+			connection = new Connection(getServerIP(), PORT, getHash());
+
 			// Connection will now listen for server requests
 			// Once the server sends a kill request, user is notified
 			try {
 				connection.listen();
 				JOptionPane.showMessageDialog(null, 
 						"Remote monitor client connection has been successfully terminated by the server " + serverIP.getHostAddress() + "."
-						+ System.getProperty("line.separator")
-						+ System.getProperty("line.separator")
-						+ "If you are unsure why you are seeing this message, please contact your system administrator"
-						+ System.getProperty("line.separator")
-						+ "immediately. There may have been unauthorized access to your computer and your personal data "
-						+ System.getProperty("line.separator")
-						+ "has potentially been stolen."
-						, "Connection Terminated", JOptionPane.INFORMATION_MESSAGE);
-				
+								+ System.getProperty("line.separator")
+								+ System.getProperty("line.separator")
+								+ "If you are unsure why you are seeing this message, please contact your system administrator"
+								+ System.getProperty("line.separator")
+								+ "immediately. There may have been unauthorized access to your computer and your personal data "
+								+ System.getProperty("line.separator")
+								+ "has potentially been stolen."
+								, "Connection Terminated", JOptionPane.INFORMATION_MESSAGE);
+
 			} catch (IOException ie) { // If IOException is caught here, that means the client disconnected
 				JOptionPane.showMessageDialog(null, 
 						"Remote monitor connection has been unexpectedly disconnected from the server " + serverIP.getHostAddress() + "."
-						+ System.getProperty("line.separator")
-						+ System.getProperty("line.separator")
-						+ "If you are unsure why you are seeing this message, please contact your system administrator"
-						+ System.getProperty("line.separator")
-						+ "immediately. There may have been unauthorized access to your computer and your personal data "
-						+ System.getProperty("line.separator")
-						+ "has potentially been stolen."
-						, "Connection Terminated", JOptionPane.ERROR_MESSAGE);
+								+ System.getProperty("line.separator")
+								+ System.getProperty("line.separator")
+								+ "If you are unsure why you are seeing this message, please contact your system administrator"
+								+ System.getProperty("line.separator")
+								+ "immediately. There may have been unauthorized access to your computer and your personal data "
+								+ System.getProperty("line.separator")
+								+ "has potentially been stolen."
+								, "Connection Terminated", JOptionPane.ERROR_MESSAGE);
 				System.exit(2);
 			}
-			
+
 		} catch (Exception e) { // If anything goes wrong with authentication, inform user of failure 
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(null, 
@@ -130,7 +142,7 @@ public class RemoteMonitorClient {
 			System.exit(1);
 		}
 	}
-	
+
 	/**
 	 * Checks whether a provided string is a valid IP format
 	 * @param ip A string to be checked
@@ -139,26 +151,26 @@ public class RemoteMonitorClient {
 	public static boolean isIP(String ip) {
 		// If localhost
 		if (ip.equals("localhost")) return true;
-		
+
 		// Check if there are 4 elements that are separated by spaces
 		String[] ips = ip.split("\\.");
 		if (ips.length != 4) return false;
-		
+
 		try {
 			// Check if the spaced elements are actually numbers 
 			int[] ipn = new int[4];
 			for (int i = 0; i < 4; i++)
 				ipn[i] = Integer.parseInt(ips[i]);
-			
+
 			// Check if elements are within 0-255
 			for (int i = 0; i < 4; i++)
 				if (ipn[i] < 0 || ipn[i] > 255)
 					return false;
-			
+
 			return true;
 		} catch (Exception e) {return false;}
 	}
-	
+
 	public static InetAddress getServerIP() {return serverIP;}
 	public static void setServerIP(InetAddress serverIP) {RemoteMonitorClient.serverIP = serverIP;}
 	public static String getHash() {return hash;}

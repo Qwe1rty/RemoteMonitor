@@ -88,6 +88,44 @@ public class ConnectionServer {
 		// Returns false if nothing happened
 		return false;
 	}
+	
+	/**
+	 * Tries to remove all dead connections. Connections that are simply inactive
+	 * will not be removed
+	 * @return Number of clients that were moved
+	 */
+	public synchronized int removeDeadConnections() {
+		
+		// Tries to send a CONN packet to all the clients. If something happens,
+		// the client is removed from the list
+		int connectionsRemoved = 0;
+		for (int i = 0; i < clients.size(); i++)
+			if (clients.get(i).isConnectionDead()) {
+				clients.get(i).shutdown();
+				connectionsRemoved++;
+//				clients.remove(i);
+			}
+		RemoteMonitorServer.updateClientList();
+		return connectionsRemoved;
+	}
+	
+	/**
+	 * Removes every single client connection regardless of what they were doing.
+	 * A kill request will be sent to the client, but there is no guarantee that
+	 * it will be received and interpreted
+	 * @return Number of clients that were removed
+	 */
+	public synchronized int removeAllConnections() {
+		// Clears eeeeeeveerrrrrryyyyttthhhiiiiinnnnngggg
+		int connectionsRemoved = 0;
+		for (int i = 0; i < clients.size(); i++) {
+			clients.get(i).requestOperation(PacketHeader.KILL);
+			connectionsRemoved++;
+//			clients.remove(i);
+		}
+		RemoteMonitorServer.updateClientList();
+		return connectionsRemoved;
+	}
 
 	/**
 	 * Sends a request to a specific client computer. If there is an operation that
@@ -124,8 +162,10 @@ public class ConnectionServer {
 			clients.get(i).shutdown();
 		
 		// Try to shut down server socket
-		try {connListener.close();} 
-		catch (IOException e) {
+		try {
+			connListener.close();
+			System.out.println("SERVER SOCKET SUCESSFULLY CLOSED");
+		} catch (IOException e) {
 			System.out.println("SERVER SOCKET COULD NOT BE CLOSED");
 			e.printStackTrace();
 		}
@@ -175,6 +215,7 @@ public class ConnectionServer {
 		 * Returns the host name of the connected computer
 		 * @return Host name of the connected computer
 		 */
+		@SuppressWarnings("unused") // This warning is dumb; this is used for the list
 		public String getHostName() {return clientHostName;}
 		
 		/**
@@ -196,22 +237,28 @@ public class ConnectionServer {
 		/**
 		 * Shuts down the connection to the client. Note that the client will not
 		 * receive any forewarning, and the user will not be informed of any dialog
-		 * that the connection has been cut
+		 * that the connection has been cut. This method will also kill any currently
+		 * running operations
 		 */
 		public void shutdown() {
 			killOperation(); // Stops whatever they were doing
 			System.out.println("CLIENT " + getAddress() + " DISCONNECTED");
 			
 			// Will try to close all output streams
-			try { 
-				input.close();
-				output.close();
-				connection.close();
-				System.out.println("CLOSING CLIENT " + getAddress() + " CONNECTIONS");
-			} catch (IOException e1) {System.out.println("CLIENT CONNECTION COULD NOT BE CLOSED");}
+			try {input.close();} catch (IOException e) {System.out.println(getAddress() + " INPUT STREAM FAILED TO CLOSE");}
+			try {output.flush();} catch (IOException e) {System.out.println(getAddress() + " OUTPUT STREAM FAILED TO FLUSH");}
+			try {output.close();} catch (IOException e) {System.out.println(getAddress() + " OUTPUT STREAM FAILED TO CLOSE");}
+			try {connection.close();} catch (IOException e) {System.out.println(getAddress() + " SOCKET CONNECTION FAILED TO CLOSE");}
 
 			// Removes connection from the server list
 			System.out.println("REMOVE CONNECTION RESULT: " + removeConnection(connection.getInetAddress()));
+		}
+		
+		public boolean isConnectionDead() {
+			try {
+				output.writeBytes(PacketHeader.CONN + System.getProperty("line.separator"));
+				return false;
+			} catch (IOException ioe) {return true;}
 		}
 		
 		/**
@@ -272,7 +319,7 @@ public class ConnectionServer {
 					}
 				});
 				operation.start();
-
+				
 			} else if (header.equals(PacketHeader.KILL)) { // Tells client to terminate its existence
 
 				// Try to send a kill request to client
