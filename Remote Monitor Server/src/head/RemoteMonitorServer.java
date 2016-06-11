@@ -156,6 +156,17 @@ public class RemoteMonitorServer {
 	public static void updateClientList() {frame.updateList();}
 	
 	/**
+	 * Tells the client server to remove a client from the connections list
+	 * 
+	 * @param client IP address of the client in InetAddress form
+	 * @return A boolean representing whether the client was found and
+	 * successfully removed
+	 */
+	public static boolean removeConnection(InetAddress client) {
+		return clientServer.removeConnection(client);
+	}
+	
+	/**
 	 * Tells the client server to remove all dead connections. A dialog box
 	 * will appear telling the user how many clients were removed
 	 */

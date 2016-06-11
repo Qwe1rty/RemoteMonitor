@@ -115,7 +115,7 @@ public class ServerPanel extends JPanel implements ActionListener {
 	public void actionPerformed(ActionEvent e) {
 
 		// Sends the appropriate request depending on what element of the popup the user selected
-		// Also I totally get that this is super lazy it works delicously so I'm not too fazed
+		// Also I totally get that this is super lazy, but it works deliciously so whatever
 		if (e.getSource() == menuKeyl)
 			RemoteMonitorServer.requestOperation(clientList.getSelectedValue(), PacketHeader.KEYL);
 		else if (e.getSource() == menuPict)
@@ -127,13 +127,4 @@ public class ServerPanel extends JPanel implements ActionListener {
 		else if (e.getSource() == clearAll)
 			RemoteMonitorServer.removeAllConnections();
 	} 
-
-	//	private void paintComponent(Graphics g) {
-	//		super.paintComponent(g);
-	//		g.setColor(Color.GRAY);
-	//		g.drawLine(14, 14, 15 + LIST_WIDTH, 14);
-	//		g.drawLine(14, 14, 14, ServerFrame.WINDOW_HEIGHT);
-	//		g.drawLine(15 + LIST_WIDTH, 14, 15 + LIST_WIDTH, ServerFrame.WINDOW_HEIGHT);
-	//		g.drawLine(14, ServerFrame.WINDOW_HEIGHT, 15 + LIST_WIDTH, ServerFrame.WINDOW_HEIGHT);
-	//	}
 }
