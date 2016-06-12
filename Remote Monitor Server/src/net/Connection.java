@@ -220,7 +220,7 @@ class Connection implements Runnable {
 
 					// Checks to see if the header and hash for authentication is valid
 					if (authMessage[0].equals(PacketHeader.AUTH)) {
-						System.out.println("AUTHENTICATION PACKET RECEIVED:" + clientAddress);
+						System.out.println("AUTHENTICATION PACKET RECEIVED: " + clientAddress);
 
 						// Check if the client hash matches
 						if (authMessage[1].equals(hash)) {
