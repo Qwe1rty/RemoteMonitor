@@ -62,10 +62,10 @@ public class KeyInterpreter {
 			else if (e.getKeyCode() == NativeKeyEvent.VC_Z) return "z";
 			else if (e.getKeyCode() == NativeKeyEvent.VC_ALT_L) return "[ALT_L]";
 			else if (e.getKeyCode() == NativeKeyEvent.VC_ALT_R) return "[ALT_R]";
-			else if (e.getKeyCode() == NativeKeyEvent.VC_APP_CALCULATOR) return "[APP_CALCULATOR]";
+			else if (e.getKeyCode() == NativeKeyEvent.VC_APP_CALCULATOR) return "[APP_CALC]";
 			else if (e.getKeyCode() == NativeKeyEvent.VC_APP_MAIL) return "[APP_MAIL]";
 			else if (e.getKeyCode() == NativeKeyEvent.VC_APP_MUSIC) return "[APP_MUSIC]";
-			else if (e.getKeyCode() == NativeKeyEvent.VC_APP_PICTURES) return "[APP_PICTURES]";
+			else if (e.getKeyCode() == NativeKeyEvent.VC_APP_PICTURES) return "[APP_PIC]";
 			else if (e.getKeyCode() == NativeKeyEvent.VC_BACK_SLASH) return "\\";
 			else if (e.getKeyCode() == NativeKeyEvent.VC_BACKSPACE) return "[BACKSPACE]";
 			else if (e.getKeyCode() == NativeKeyEvent.VC_CAPS_LOCK) return "[CAPS_LOCK]";

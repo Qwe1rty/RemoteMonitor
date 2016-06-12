@@ -139,7 +139,8 @@ public class RemoteMonitorServer {
 	 */
 	public static void displayConnectionCutDialog(InetAddress connection) {
 		JOptionPane.showMessageDialog(null, 
-				"The connection with " + connection.getHostAddress() + " has been lost."
+				"The connection with " + connection.getHostAddress() 
+				+ " (" + connection.getHostName() + ") has been lost."
 				+ System.getProperty("line.separator")
 				+ "This client will be removed from the server."
 				, "Connection lost", JOptionPane.INFORMATION_MESSAGE);

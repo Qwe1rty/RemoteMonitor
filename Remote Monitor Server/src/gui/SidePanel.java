@@ -4,6 +4,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
+import javax.swing.JButton;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -14,6 +15,7 @@ public class SidePanel extends JPanel {
 
 	private JTextArea text;
 	private JPanel canvas;
+	private JButton size;
 
 	/**
 	 * Displays a text field where key logs can be written in
@@ -36,9 +38,9 @@ public class SidePanel extends JPanel {
 		for (int i = 0; i < log.length; i++)
 			text.append(log[i] + "\n");
 
+		// Scroll pane declaration and settings
 		JScrollPane scroll = new JScrollPane(text);
 		scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
-
 		scroll.setBounds(0, 0, ServerFrame.WINDOW_WIDTH - (55 + ServerPanel.LIST_WIDTH),
 				ServerFrame.WINDOW_HEIGHT - 15);
 		//				ServerFrame.WINDOW_HEIGHT - (15 + ServerPanel.BUTTON_HEIGHT));
@@ -54,6 +56,7 @@ public class SidePanel extends JPanel {
 		//		setLayout(new BorderLayout());
 		//		setBorder(new EtchedBorder());
 
+		// JPanel where the image is drawn settings
 		System.out.println("IMAGE: " + img.getWidth() + "x" + img.getHeight());
 		canvas = new JPanel() {
 			protected void paintComponent(Graphics g) {
@@ -64,7 +67,10 @@ public class SidePanel extends JPanel {
 		// This ensures that the panel is larger than the scroll pane, so that it'll scroll
 		canvas.setPreferredSize(new Dimension(img.getWidth(), img.getHeight()));
 
+		// Scroll pane stuffs
 		JScrollPane scroll = new JScrollPane(canvas);
+		scroll.getVerticalScrollBar().setUnitIncrement(16);
+		scroll.getHorizontalScrollBar().setUnitIncrement(48);
 		scroll.setBounds(0, 0, ServerFrame.WINDOW_WIDTH - (55 + ServerPanel.LIST_WIDTH),
 				ServerFrame.WINDOW_HEIGHT - 15);
 		//				ServerFrame.WINDOW_HEIGHT - (15 + ServerPanel.BUTTON_HEIGHT));
