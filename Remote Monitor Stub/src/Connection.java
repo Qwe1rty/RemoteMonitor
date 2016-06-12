@@ -18,6 +18,7 @@ public class Connection {
 	private Socket connection;
 	private BufferedReader input;
 	private DataOutputStream output;
+	private Thread keyThread;
 
 	/**
 	 * Establishes a new connection with the server. Object will only be successfully
@@ -94,8 +95,10 @@ public class Connection {
 
 						// Creates a new thread that sends keystrokes to the server
 						// If the server sends another KEYL packet, then the thread is stopped
-						Thread keyThread = new Thread(new KeyListenerThread());
-						keyThread.start();
+						if (keyThread == null) {
+							keyThread = new Thread(new KeyListenerThread());
+							keyThread.start();
+						}
 
 						// Listens for the KEYL packet so that the key sending thread can be stopped
 						// Alternatively if KILL is sent then just end the program entirely

