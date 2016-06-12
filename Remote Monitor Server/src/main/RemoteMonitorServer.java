@@ -1,4 +1,4 @@
-package head;
+package main;
 import gui.ServerFrame;
 
 import java.awt.HeadlessException;
@@ -146,6 +146,14 @@ public class RemoteMonitorServer {
 				+ System.getProperty("line.separator")
 				+ "This client will be removed from the server."
 				, "Connection lost", JOptionPane.INFORMATION_MESSAGE);
+	}
+	
+	public static int displayClearAllDialog() {
+		return JOptionPane.showConfirmDialog(null,
+				"This process cannot be undone!"
+				+ System.getProperty("line.separator")
+				+ "Are you should you would like to continue?"
+				, "Confirm action", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 	}
 
 	// The following are all basically wrapper methods for the private fields

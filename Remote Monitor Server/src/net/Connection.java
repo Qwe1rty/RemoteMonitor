@@ -1,13 +1,13 @@
 package net;
 
-import head.RemoteMonitorServer;
-
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.Socket;
+
+import main.RemoteMonitorServer;
 
 /**
  * Manages the connection between a client and the server
@@ -104,7 +104,7 @@ class Connection implements Runnable {
 	 * interrupted and cleared
 	 * @param header Packet header to be sent
 	 */
-	public void requestOperation(final String header) {
+	public void requestOperation(final String header, final boolean forced) {
 
 		// Kills any currently running operation
 		if (operation != null)
@@ -138,7 +138,7 @@ class Connection implements Runnable {
 						
 					} catch (IOException e) { // IOException means the client disconnected
 						shutdown(); 
-						RemoteMonitorServer.displayConnectionCutDialog(connection.getInetAddress());
+						if (!forced) RemoteMonitorServer.displayConnectionCutDialog(connection.getInetAddress());
 						operation = null;
 					}
 				}

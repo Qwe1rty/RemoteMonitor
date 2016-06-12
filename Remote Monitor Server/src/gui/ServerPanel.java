@@ -1,7 +1,5 @@
 package gui;
 
-import head.RemoteMonitorServer;
-
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -20,6 +18,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.SwingUtilities;
 
+import main.RemoteMonitorServer;
 import net.PacketHeader;
 
 public class ServerPanel extends JPanel implements ActionListener {
@@ -88,7 +87,7 @@ public class ServerPanel extends JPanel implements ActionListener {
 		menuPict.addActionListener(this);
 		menuKill.addActionListener(this);
 
-		// Adds all the components
+		// Sets bounds and adds all the components
 		clientListScroll.setBounds(15, 15, LIST_WIDTH, LIST_HEIGHT);
 		clearDead.setBounds(15, 15 + LIST_HEIGHT, LIST_WIDTH, BUTTON_HEIGHT);
 		clearAll.setBounds(15, 15 + LIST_HEIGHT + BUTTON_HEIGHT, LIST_WIDTH, BUTTON_HEIGHT);
@@ -143,8 +142,10 @@ public class ServerPanel extends JPanel implements ActionListener {
 			RemoteMonitorServer.requestOperation(clientList.getSelectedValue(), PacketHeader.KILL);
 		else if (e.getSource() == clearDead)
 			RemoteMonitorServer.removeDeadConnections();
-		else if (e.getSource() == clearAll)
-			RemoteMonitorServer.removeAllConnections();
+		else if (e.getSource() == clearAll) {
+			if (RemoteMonitorServer.displayClearAllDialog() == 0)
+				RemoteMonitorServer.removeAllConnections();
+		}
 	}
 	
 	/**

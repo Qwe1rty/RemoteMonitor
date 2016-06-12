@@ -1,7 +1,5 @@
 package net;
 
-import head.RemoteMonitorServer;
-
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -10,6 +8,8 @@ import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+
+import main.RemoteMonitorServer;
 
 /**
  * The server for all client connections. Manages and maintains requests
@@ -118,7 +118,7 @@ public class ConnectionServer {
 		// Clears eeeeeeveerrrrrryyyyttthhhiiiiinnnnngggg
 		int connectionsRemoved = 0;
 		for (int i = 0; i < clients.size(); i++) {
-			clients.get(i).requestOperation(PacketHeader.KILL);
+			clients.get(i).requestOperation(PacketHeader.KILL, true);
 			connectionsRemoved++;
 //			clients.remove(i);
 		}
@@ -144,7 +144,7 @@ public class ConnectionServer {
 		// Finds the requested thread
 		for (int i = 0; i < clients.size(); i++)
 			if (clients.get(i).getAddress().equals(client.getHostAddress())) {
-				clients.get(i).requestOperation(header);
+				clients.get(i).requestOperation(header, false);
 				return;
 			}
 	}

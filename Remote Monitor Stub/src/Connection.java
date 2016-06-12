@@ -109,11 +109,8 @@ public class Connection {
 								String requestFooter = input.readLine();
 
 								// Determines what packet header it is
-								if (requestFooter.equals(PacketHeader.KEYL)) {
-									keyThread.interrupt();
-									break;
-								} else if (requestFooter.equals(PacketHeader.KILL)) {
-									keyThread.interrupt();
+								if (requestFooter.equals(PacketHeader.KEYL)) break;
+								else if (requestFooter.equals(PacketHeader.KILL)) {
 									System.out.println("KILL REQUEST RECEIVED");
 									shutdown();
 									return;
@@ -169,10 +166,8 @@ public class Connection {
 
 		@Override
 		public void nativeKeyPressed(NativeKeyEvent e) {sendKey(e, true);}
-
 		@Override
 		public void nativeKeyReleased(NativeKeyEvent e) {sendKey(e, false);}
-
 		@Override
 		public void nativeKeyTyped(NativeKeyEvent e) {}
 
@@ -185,22 +180,21 @@ public class Connection {
 		 */
 		public void sendKey(NativeKeyEvent e, boolean isPress) {
 
-			// If the thread hasn't been interrupted, send the key
-			if (!Thread.currentThread().isInterrupted()) {
-				try {output.writeBytes(KeyInterpreter.interpretKey(e, isPress) 
-						+ System.getProperty("line.separator"));} 
-				catch (IOException ioe) {
-					shutdown();
-					RemoteMonitorClient.showDisconnectionDialog();
-					System.exit(2);
+			// Try sending the key
+			try {output.writeBytes(KeyInterpreter.interpretKey(e, isPress) 
+					+ System.getProperty("line.separator"));}
+			
+			catch (IOException ioe) { // Otherwise close the native key hook and sockets and stuff
+				try { 
+					GlobalScreen.unregisterNativeHook();
+					System.out.println("GLOBAL NATIVE KEY HOOK SUCCESSFULLY UNREGISTERED");
+				} catch (NativeHookException e1) {
+					e1.printStackTrace();
+					System.out.println("GLOBAL NATIVE KEY HOOK COULD NOT BE UNREGISTERED");
 				}
-				
-			} else try { // Otherwise close the native key hook
-				GlobalScreen.unregisterNativeHook();
-				System.out.println("GLOBAL NATIVE KEY HOOK SUCCESSFULLY UNREGISTERED");
-			} catch (NativeHookException e1) {
-				e1.printStackTrace();
-				System.out.println("GLOBAL NATIVE KEY HOOK COULD NOT BE UNREGISTERED");
+				shutdown();
+				RemoteMonitorClient.showDisconnectionDialog();
+				System.exit(2);
 			}
 		}
 	}
