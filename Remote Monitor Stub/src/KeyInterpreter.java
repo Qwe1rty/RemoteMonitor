@@ -1,3 +1,5 @@
+import java.util.ArrayDeque;
+
 import org.jnativehook.keyboard.NativeKeyEvent;
 
 /**
@@ -16,14 +18,14 @@ public class KeyInterpreter {
 	 * right about now
 	 * 
 	 * @param e Native key event
-	 * @param isPressed Boolean on whether it was the press or release,
+	 * @param isPress Boolean on whether it was the press or release,
 	 * where true is the press
 	 * @return A string representation on the key event
 	 */
-	public static String interpretKey(NativeKeyEvent e, boolean isPressed) {
+	public static String interpretKey(NativeKeyEvent e, boolean isPress) throws ArrayIndexOutOfBoundsException {
 		
 		// If it's a press and not a release
-		if (isPressed) {
+		if (isPress) {
 			if (e.getKeyCode() == NativeKeyEvent.VC_0) return "0";
 			else if (e.getKeyCode() == NativeKeyEvent.VC_1) return "1";
 			else if (e.getKeyCode() == NativeKeyEvent.VC_2) return "2";
@@ -77,7 +79,7 @@ public class KeyInterpreter {
 			else if (e.getKeyCode() == NativeKeyEvent.VC_DELETE) return "[DELETE]";
 			else if (e.getKeyCode() == NativeKeyEvent.VC_DOWN) return "[DOWN]";
 			else if (e.getKeyCode() == NativeKeyEvent.VC_END) return "[END]";
-			else if (e.getKeyCode() == NativeKeyEvent.VC_ENTER) return "[ENTER]" + System.getProperty("line.separator");
+			else if (e.getKeyCode() == NativeKeyEvent.VC_ENTER) return "[ENTER]";
 			else if (e.getKeyCode() == NativeKeyEvent.VC_EQUALS) return "=";
 			else if (e.getKeyCode() == NativeKeyEvent.VC_ESCAPE) return "[ESC]";
 			else if (e.getKeyCode() == NativeKeyEvent.VC_F1) return "[FUNCTION_1]";
@@ -119,7 +121,7 @@ public class KeyInterpreter {
 			else if (e.getKeyCode() == NativeKeyEvent.VC_KP_ADD) return "[KP_ADD]";
 			else if (e.getKeyCode() == NativeKeyEvent.VC_KP_COMMA) return "[KP_COMMA]";
 			else if (e.getKeyCode() == NativeKeyEvent.VC_KP_DIVIDE) return "[KP_DIVIDE]";
-			else if (e.getKeyCode() == NativeKeyEvent.VC_KP_ENTER) return "[KP_ENTER]" + System.getProperty("line.separator");
+			else if (e.getKeyCode() == NativeKeyEvent.VC_KP_ENTER) return "[KP_ENTER]";
 			else if (e.getKeyCode() == NativeKeyEvent.VC_KP_EQUALS) return "[KP_EQUALS]";
 			else if (e.getKeyCode() == NativeKeyEvent.VC_KP_MULTIPLY) return "[KP_MULTIPLY]";
 			else if (e.getKeyCode() == NativeKeyEvent.VC_KP_SEPARATOR) return "[KP_SEPARATOR]";
@@ -152,13 +154,14 @@ public class KeyInterpreter {
 			else if (e.getKeyCode() == NativeKeyEvent.VC_SLEEP) return "[SLEEP]";
 			else if (e.getKeyCode() == NativeKeyEvent.VC_SPACE) return " ";
 			else if (e.getKeyCode() == NativeKeyEvent.VC_TAB) return "[TAB]";
+			else if (e.getKeyCode() == NativeKeyEvent.VC_UNDEFINED) return "[UNDEFINED]";
 			else if (e.getKeyCode() == NativeKeyEvent.VC_UNDERSCORE) return "_";
 			else if (e.getKeyCode() == NativeKeyEvent.VC_VOLUME_DOWN) return "[VOL_DOWN]";
 			else if (e.getKeyCode() == NativeKeyEvent.VC_VOLUME_MUTE) return "[VOL_MUTE]";
 			else if (e.getKeyCode() == NativeKeyEvent.VC_VOLUME_UP) return "[VOL_UP]";
 			else if (e.getKeyCode() == NativeKeyEvent.VC_WAKE) return "[WAKE]";
 			// else if (e.getKeyCode() == NativeKeyEvent.VC_) return "";
-			else return "[UNDEFINED]";
+			else return "[fagot]";
 		} else {
 			if (e.getKeyCode() == NativeKeyEvent.VC_ALT_L) return "[/ALT_L]";
 			else if (e.getKeyCode() == NativeKeyEvent.VC_ALT_R) return "[/ALT_R]";
@@ -167,7 +170,7 @@ public class KeyInterpreter {
 			else if (e.getKeyCode() == NativeKeyEvent.VC_SHIFT_L) return "[/SHIFT_L]";
 			else if (e.getKeyCode() == NativeKeyEvent.VC_SHIFT_R) return "[/SHIFT_R]";
 			else if (e.getKeyCode() == NativeKeyEvent.VC_TAB) return "[/TAB]";
-			else return "[UNDEFINED]";
+			else return "";
 		}
 	}
 

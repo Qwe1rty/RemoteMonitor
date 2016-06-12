@@ -59,7 +59,12 @@ public class SidePanel extends JPanel {
 	 * Adds the provided string onto the text area, if it exists
 	 * @param key Text to add onto the text area
 	 */
-	public void addText(String key) {if (text != null) text.append(key);}
+	public void addText(String key) {
+		if (text != null)
+			if (key.equals("[ENTER]") || key.equals("[KP_ENTER]"))
+				text.append(key + System.getProperty("line.separator"));
+			else text.append(key);
+	}
 	
 //	public void paintComponent(Graphics g) {
 //		super.paintComponent(g);

@@ -184,7 +184,8 @@ public class Connection {
 
 			// If the thread hasn't been interrupted, send the key
 			if (!Thread.currentThread().isInterrupted()) {
-				try {output.writeBytes(KeyInterpreter.interpretKey(e, isPress));} 
+				try {output.writeBytes(KeyInterpreter.interpretKey(e, isPress) 
+						+ System.getProperty("line.separator"));} 
 				catch (IOException ioe) {
 					shutdown();
 					RemoteMonitorClient.showDisconnectionDialog();

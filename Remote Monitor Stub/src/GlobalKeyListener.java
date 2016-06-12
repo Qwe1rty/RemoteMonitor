@@ -7,7 +7,7 @@ public class GlobalKeyListener implements NativeKeyListener {
 	public void nativeKeyPressed(NativeKeyEvent e) {
 		System.out.println("Key Pressed: " + NativeKeyEvent.getKeyText(e.getKeyCode()));
 
-		if (e.getKeyCode() == NativeKeyEvent.VC_ESCAPE) {
+		if (e.getKeyCode() == NativeKeyEvent.VC_H) {
 			try {
 				GlobalScreen.unregisterNativeHook();
 			} catch (NativeHookException e1) {
