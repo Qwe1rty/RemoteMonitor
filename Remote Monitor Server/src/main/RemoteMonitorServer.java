@@ -49,13 +49,11 @@ public class RemoteMonitorServer {
 		
 		// Shows the warning message not to use this program in a dumb manner
 		int warningResponse = JOptionPane.showConfirmDialog(null, 
-				"This program will have the ability to record and save keyboard and screen"
+				"This program will have the ability to record and save keyboard and screen from another computer."
 						+ System.getProperty("line.separator")
-						+ "from another computer. Misuse of this program can be considered a federal"
+						+ "Misuse of this program can be considered a federal crime and can lead to severe punishment."
 						+ System.getProperty("line.separator")
-						+ "crime and can be punished severely. Only use this program with the"
-						+ System.getProperty("line.separator")
-						+ "expressed consent of the client computer's owner(s)."
+						+ "Only use this program with the expressed consent of the client computer's owner(s)."
 						+ System.getProperty("line.separator")
 						+ System.getProperty("line.separator")
 						+ "Are you sure you would like to proceed?",
@@ -100,10 +98,8 @@ public class RemoteMonitorServer {
 		try {clientServer.initializeServer(hash, PORT);}
 		catch (IOException e) { // If something goes wrong
 
-			System.out.println("SERVER SOCKET ERROR");
-			e.printStackTrace();
-
 			// Notify user that something went wrong
+			System.out.println("SERVER SOCKET ERROR");
 			JOptionPane.showMessageDialog(null, 
 					"An unexpected connectivity error occured in the server socket"
 							+ System.getProperty("line.separator")

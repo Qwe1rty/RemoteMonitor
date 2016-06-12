@@ -40,11 +40,9 @@ public class RemoteMonitorClient {
 		// their computer to be monitored. Also, all the dialog boxes prevent someone
 		// from just silently running the stub without the owner's knowledge
 		int consentResponse = JOptionPane.showConfirmDialog(null, 
-				"Are you sure you would like to allow this program to send"
+				"Are you sure you would like to allow this program to send your keyboard input and screen"
 						+ System.getProperty("line.separator")
-						+ "your keyboard input and screen feed to another computer?"
-						+ System.getProperty("line.separator")
-						+ "You will not be able to terminate the program via normal means."
+						+ "feed to another computer? You will not be able to terminate the program via normal means."
 						+ System.getProperty("line.separator")
 						+ System.getProperty("line.separator")
 						+ "If you are unsure whether to proceed, DO NOT continue.",
@@ -110,6 +108,7 @@ public class RemoteMonitorClient {
 			try {
 				connection.listen();
 				showTerminationDialog();
+				System.exit(0);
 
 			} catch (IOException ie) { // If IOException is caught here, that means the client disconnected
 				showDisconnectionDialog();

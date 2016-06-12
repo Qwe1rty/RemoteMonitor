@@ -158,7 +158,7 @@ class Connection implements Runnable {
 						}
 					} catch (IOException e) { // IOException means the client disconnected
 						shutdown(); 
-						RemoteMonitorServer.displayConnectionCutDialog(connection.getInetAddress());
+						if (!forced) RemoteMonitorServer.displayConnectionCutDialog(connection.getInetAddress());
 					}
 				}
 			});

@@ -1,6 +1,5 @@
 package gui;
 
-import java.awt.BorderLayout;
 import java.awt.Graphics;
 import java.awt.image.BufferedImage;
 
@@ -8,7 +7,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
-import javax.swing.border.EtchedBorder;
+import javax.swing.text.DefaultCaret;
 
 public class SidePanel extends JPanel {
 	
@@ -25,6 +24,10 @@ public class SidePanel extends JPanel {
 		text.setLineWrap(true);
 		text.setWrapStyleWord(true);
 		
+		// Auto scrolling
+		DefaultCaret caret = (DefaultCaret) text.getCaret();
+		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+		
 		for (int i = 0; i < log.length; i++)
 			text.append(log[i] + "\n");
 		
@@ -32,7 +35,8 @@ public class SidePanel extends JPanel {
 		scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		
 		scroll.setBounds(0, 0, ServerFrame.WINDOW_WIDTH - (55 + ServerPanel.LIST_WIDTH),
-				ServerFrame.WINDOW_HEIGHT - (15 + ServerPanel.BUTTON_HEIGHT));
+				ServerFrame.WINDOW_HEIGHT - 15);
+//				ServerFrame.WINDOW_HEIGHT - (15 + ServerPanel.BUTTON_HEIGHT));
 		add(scroll);
 	}
 	
@@ -51,7 +55,8 @@ public class SidePanel extends JPanel {
 		scroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		
 		scroll.setBounds(0, 0, ServerFrame.WINDOW_WIDTH - (55 + ServerPanel.LIST_WIDTH),
-				ServerFrame.WINDOW_HEIGHT - (15 + ServerPanel.BUTTON_HEIGHT));
+				ServerFrame.WINDOW_HEIGHT - 15);
+//				ServerFrame.WINDOW_HEIGHT - (15 + ServerPanel.BUTTON_HEIGHT));
 		add(scroll);
 	}
 	
