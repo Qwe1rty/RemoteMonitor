@@ -25,5 +25,14 @@ public class ServerFrame extends JFrame {
 		setVisible(true);
 	}
 	
+	/**
+	 * Updates the client list
+	 */
 	public void updateList() {mainPanel.updateList();}
+	
+	/**
+	 * Gets the side panel to add the text onto the text field if that exists
+	 * @param key Text to add onto the text area
+	 */
+	public void addText(String key) {mainPanel.addText(key);}
 }

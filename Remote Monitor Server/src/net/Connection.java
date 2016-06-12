@@ -124,7 +124,9 @@ class Connection implements Runnable {
 							if (input.ready()) {
 								String keystroke = bufferedInput.readLine();
 								System.out.print(keystroke);
-								// TODO add keystroke to GUI
+								
+								// Adds the logged key to the text area if that's still existant
+								RemoteMonitorServer.addText(keystroke);
 							}
 						}
 

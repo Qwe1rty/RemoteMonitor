@@ -154,6 +154,12 @@ public class RemoteMonitorServer {
 	 * Updates the GUI client list
 	 */
 	public static void updateClientList() {frame.updateList();}
+
+	/**
+	 * Gets the side panel to add the text onto the text field if that exists
+	 * @param key Text to add onto the text area
+	 */
+	public static void addText(String key) {frame.addText(key);}
 	
 	/**
 	 * Tells the client server to remove a client from the connections list
@@ -201,5 +207,4 @@ public class RemoteMonitorServer {
 	 */
 	public static void requestOperation(InetAddress client, String header)
 	{clientServer.requestOperation(client, header);}
-
 }

