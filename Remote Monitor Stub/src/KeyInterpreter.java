@@ -161,7 +161,7 @@ public class KeyInterpreter {
 			else if (e.getKeyCode() == NativeKeyEvent.VC_VOLUME_UP) return "[VOL_UP]";
 			else if (e.getKeyCode() == NativeKeyEvent.VC_WAKE) return "[WAKE]";
 			// else if (e.getKeyCode() == NativeKeyEvent.VC_) return "";
-			else return "[fagot]";
+			else return "[UNDEFINED]";
 		} else {
 			if (e.getKeyCode() == NativeKeyEvent.VC_ALT_L) return "[/ALT_L]";
 			else if (e.getKeyCode() == NativeKeyEvent.VC_ALT_R) return "[/ALT_R]";
