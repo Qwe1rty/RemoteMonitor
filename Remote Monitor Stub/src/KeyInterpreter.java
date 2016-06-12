@@ -1,5 +1,3 @@
-import java.util.ArrayDeque;
-
 import org.jnativehook.keyboard.NativeKeyEvent;
 
 /**

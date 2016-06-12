@@ -14,6 +14,10 @@ public class SidePanel extends JPanel {
 	private JTextArea text;
 	private JPanel canvas;
 
+	/**
+	 * Displays a text field where key logs can be written in
+	 * @param log Default text to be displayed
+	 */
 	public SidePanel(String[] log) {
 		setLayout(null);
 //		setLayout(new BorderLayout());
@@ -40,6 +44,10 @@ public class SidePanel extends JPanel {
 		add(scroll);
 	}
 	
+	/**
+	 * Displays a scrollable image in the entirety of the panel
+	 * @param img Image to be displayed
+	 */
 	public SidePanel(final BufferedImage img) {
 		setLayout(null);
 //		setLayout(new BorderLayout());

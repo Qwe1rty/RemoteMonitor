@@ -1,21 +1,25 @@
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
+/**
+ * This is the client portion of the remote monitor program. When run on
+ * a computer, it will be able to send keystrokes along with screen captures
+ * to the specified server.
+ * 
+ * @author Caleb Choi
+ */
 public class RemoteMonitorClient {
 
 	private static final int PORT = 60922;
 	private static final int AUTH_TIMEOUT = 10; // default is 15, for 15 secs
 
+	// Client has only one connection unlike server, so static fields are ok here
 	private static InetAddress serverIP;
 	private static Connection connection;
 	private static String hash;
@@ -112,6 +116,7 @@ public class RemoteMonitorClient {
 
 			} catch (IOException ie) { // If IOException is caught here, that means the client disconnected
 				showDisconnectionDialog();
+				ie.printStackTrace();
 				System.exit(2);
 			}
 

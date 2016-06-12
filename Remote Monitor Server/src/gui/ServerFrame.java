@@ -1,5 +1,6 @@
 package gui;
 
+import java.awt.image.BufferedImage;
 import java.net.UnknownHostException;
 
 import javax.swing.JFrame;
@@ -29,6 +30,12 @@ public class ServerFrame extends JFrame {
 	 * Updates the client list
 	 */
 	public void updateList() {mainPanel.updateList();}
+	
+	/**
+	 * Resets the side panel to a specified image
+	 * @param img Image to be displayed
+	 */
+	public void resetPictureArea(BufferedImage img) {mainPanel.resetPictureArea(img);}
 	
 	/**
 	 * Gets the side panel to add the text onto the text field if that exists

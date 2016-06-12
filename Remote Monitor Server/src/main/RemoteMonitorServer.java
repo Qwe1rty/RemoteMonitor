@@ -2,6 +2,7 @@ package main;
 import gui.ServerFrame;
 
 import java.awt.HeadlessException;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
@@ -175,6 +176,12 @@ public class RemoteMonitorServer {
 	public static boolean removeConnection(InetAddress client) {
 		return clientServer.removeConnection(client);
 	}
+	
+	/**
+	 * Resets the side panel to a specified image
+	 * @param img Image to be displayed
+	 */
+	public static void resetPictureArea(BufferedImage img) {frame.resetPictureArea(img);}
 	
 	/**
 	 * Tells the client server to remove all dead connections. A dialog box

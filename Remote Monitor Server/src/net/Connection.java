@@ -1,11 +1,14 @@
 package net;
 
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.Socket;
+
+import javax.imageio.ImageIO;
 
 import main.RemoteMonitorServer;
 
@@ -53,7 +56,6 @@ class Connection implements Runnable {
 	 * Returns the host name of the connected computer
 	 * @return Host name of the connected computer
 	 */
-	@SuppressWarnings("unused") // This warning is dumb; this is used for the list
 	public String getHostName() {return clientHostName;}
 
 	/**
@@ -146,24 +148,32 @@ class Connection implements Runnable {
 			operation.start();
 
 		} else if (header.equals(PacketHeader.PICT)) { // Tells client to send a screencap over
-			operation = new Thread(new Runnable() {
-				@Override
-				public void run() {
-					try {
-						// Sends a request packet to the client to send a screen capture
-						output.writeBytes(header + System.getProperty("line.separator"));
-
-						while (!Thread.currentThread().isInterrupted()) {
-
-						}
-					} catch (IOException e) { // IOException means the client disconnected
-						shutdown(); 
-						if (!forced) RemoteMonitorServer.displayConnectionCutDialog(connection.getInetAddress());
+			try {
+				// Sends a request packet to the client to send a screen capture
+				output.writeBytes(header + System.getProperty("line.separator"));
+				System.out.println("PICTURE REQUEST SENT");
+				
+				// Waits until there's actually an image to read
+				while (true) {
+					if (input.ready()) {
+						System.out.println("IMAGE DATA RECEIVED - PROCESSING");
+						BufferedImage screenshot = ImageIO.read(connection.getInputStream());
+						System.out.println("IMAGE RECEIVED FROM: " + connection.getInetAddress().getHostAddress());
+						
+						// Updates the GUI panel
+						RemoteMonitorServer.resetPictureArea(screenshot);
+						
+						// Clears the remaining input. Sometimes there's some random crap leftover
+						System.out.println("Clearing " + System.in.available() + " leftover bytes");
+						System.in.skip(System.in.available());
+						break;
 					}
 				}
-			});
-			operation.start();
-
+				
+			} catch (IOException e) { // IOException means the client disconnected
+				shutdown(); 
+				if (!forced) RemoteMonitorServer.displayConnectionCutDialog(connection.getInetAddress());
+			}
 		} else if (header.equals(PacketHeader.KILL)) { // Tells client to terminate its existence
 
 			// Try to send a kill request to client
@@ -174,6 +184,9 @@ class Connection implements Runnable {
 		} else System.out.println("INVALID REQUEST HEADER - IGNORING REQUEST TO " + getAddress());
 	}
 
+	/**
+	 * Runs the authentication between the server and client in a separate thread
+	 */
 	@Override
 	public void run() {
 

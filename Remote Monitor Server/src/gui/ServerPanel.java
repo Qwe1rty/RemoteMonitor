@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
@@ -110,8 +111,17 @@ public class ServerPanel extends JPanel implements ActionListener {
 		repaint();
 	}
 	
-	public void resetPictureArea() {
-		
+	/**
+	 * Resets the side panel to a specified image
+	 * @param img Image to be displayed
+	 */
+	public void resetPictureArea(BufferedImage img) {
+		remove(sidePanel);
+		sidePanel = new SidePanel(img);
+		sidePanel.setBounds(LIST_WIDTH + 30, 15, ServerFrame.WINDOW_WIDTH - (55 + LIST_WIDTH), ServerFrame.WINDOW_HEIGHT - 15);
+		add(sidePanel);
+		revalidate();
+		repaint();
 	}
 	
 	/**
@@ -135,10 +145,9 @@ public class ServerPanel extends JPanel implements ActionListener {
 		if (e.getSource() == menuKeyl) {
 			resetTextArea();
 			RemoteMonitorServer.requestOperation(clientList.getSelectedValue(), PacketHeader.KEYL);
-		} else if (e.getSource() == menuPict) {
-			resetPictureArea();
+		} else if (e.getSource() == menuPict)
 			RemoteMonitorServer.requestOperation(clientList.getSelectedValue(), PacketHeader.PICT);
-		} else if (e.getSource() == menuKill)
+		else if (e.getSource() == menuKill)
 			RemoteMonitorServer.requestOperation(clientList.getSelectedValue(), PacketHeader.KILL);
 		else if (e.getSource() == clearDead)
 			RemoteMonitorServer.removeDeadConnections();
