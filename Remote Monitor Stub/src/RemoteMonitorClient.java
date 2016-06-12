@@ -109,36 +109,16 @@ public class RemoteMonitorClient {
 			// Once the server sends a kill request, user is notified
 			try {
 				connection.listen();
-				JOptionPane.showMessageDialog(null, 
-						"Remote monitor client connection has been successfully terminated by the server " + serverIP.getHostAddress() + "."
-								+ System.getProperty("line.separator")
-								+ System.getProperty("line.separator")
-								+ "If you are unsure why you are seeing this message, please contact your system administrator"
-								+ System.getProperty("line.separator")
-								+ "immediately. There may have been unauthorized access to your computer and your personal data "
-								+ System.getProperty("line.separator")
-								+ "has potentially been stolen."
-								, "Connection Terminated", JOptionPane.INFORMATION_MESSAGE);
+				showTerminationDialog();
 
 			} catch (IOException ie) { // If IOException is caught here, that means the client disconnected
-				JOptionPane.showMessageDialog(null, 
-						"Remote monitor connection has been unexpectedly disconnected from the server " + serverIP.getHostAddress() + "."
-								+ System.getProperty("line.separator")
-								+ System.getProperty("line.separator")
-								+ "If you are unsure why you are seeing this message, please contact your system administrator"
-								+ System.getProperty("line.separator")
-								+ "immediately. There may have been unauthorized access to your computer and your personal data "
-								+ System.getProperty("line.separator")
-								+ "has potentially been stolen."
-								, "Connection Terminated", JOptionPane.ERROR_MESSAGE);
+				showDisconnectionDialog();
 				System.exit(2);
 			}
 
 		} catch (Exception e) { // If anything goes wrong with authentication, inform user of failure 
 			e.printStackTrace();
-			JOptionPane.showMessageDialog(null, 
-					"Unable to authenticate with server. Program will now terminate" 
-					, "Authentication unsuccessful", JOptionPane.ERROR_MESSAGE);
+			showUnauthenticatedDialog();
 			System.exit(1);
 		}
 	}
@@ -200,4 +180,60 @@ public class RemoteMonitorClient {
 		return hexStr;
 	}
 
+	/**
+	 * Show the information dialog when the server terminates the client's connection
+	 */
+	public static void showTerminationDialog() { // exit code 0
+		JOptionPane.showMessageDialog(null, 
+				"Remote monitor client connection has been successfully terminated by the server " + serverIP.getHostAddress() + "."
+						+ System.getProperty("line.separator")
+						+ System.getProperty("line.separator")
+						+ "If you are unsure why you are seeing this message, please contact your system administrator"
+						+ System.getProperty("line.separator")
+						+ "immediately. There may have been unauthorized access to your computer and your personal data "
+						+ System.getProperty("line.separator")
+						+ "has potentially been stolen."
+						, "Connection Terminated", JOptionPane.INFORMATION_MESSAGE);
+	}
+
+	/**
+	 * Shows the error dialog when the client is unable to authenticate with the server
+	 */
+	public static void showUnauthenticatedDialog() { // exit code 1
+		JOptionPane.showMessageDialog(null, 
+				"Unable to authenticate with server. Program will now terminate" 
+				, "Authentication unsuccessful", JOptionPane.ERROR_MESSAGE);
+	}
+	
+	/**
+	 * Show the error dialog when the client has been disconnected from the server unexpectedly
+	 */
+	public static void showDisconnectionDialog() { // exit code 2
+		JOptionPane.showMessageDialog(null, 
+				"Remote monitor connection has been unexpectedly disconnected from the server " + serverIP.getHostAddress() + "."
+						+ System.getProperty("line.separator")
+						+ System.getProperty("line.separator")
+						+ "If you are unsure why you are seeing this message, please contact your system administrator"
+						+ System.getProperty("line.separator")
+						+ "immediately. There may have been unauthorized access to your computer and your personal data "
+						+ System.getProperty("line.separator")
+						+ "has potentially been stolen."
+						, "Connection Terminated", JOptionPane.ERROR_MESSAGE);
+	}
+	
+	/**
+	 * Show the error dialog when the client has been disconnected from the server unexpectedly
+	 */
+	public static void showNativeHookExceptionDialog() { // exit code 3
+		JOptionPane.showMessageDialog(null, 
+				"Native key hook was unsuccessful and will now disconnect from the server " + serverIP.getHostAddress() + "."
+						+ System.getProperty("line.separator")
+						+ System.getProperty("line.separator")
+						+ "If you are unsure why you are seeing this message, please contact your system administrator"
+						+ System.getProperty("line.separator")
+						+ "immediately. There may have been unauthorized access to your computer and your personal data "
+						+ System.getProperty("line.separator")
+						+ "has potentially been stolen."
+						, "Connection Terminated", JOptionPane.ERROR_MESSAGE);
+	}
 }

