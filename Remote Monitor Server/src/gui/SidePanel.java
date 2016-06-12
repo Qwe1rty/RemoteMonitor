@@ -61,6 +61,7 @@ public class SidePanel extends JPanel {
 				g.drawImage(img, 0, 0, null);
 			}
 		};
+		// This ensures that the panel is larger than the scroll pane, so that it'll scroll
 		canvas.setPreferredSize(new Dimension(img.getWidth(), img.getHeight()));
 
 		JScrollPane scroll = new JScrollPane(canvas);

