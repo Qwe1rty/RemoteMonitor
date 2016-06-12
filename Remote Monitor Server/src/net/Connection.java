@@ -94,6 +94,11 @@ class Connection implements Runnable {
 		System.out.println("REMOVE CONNECTION RESULT: " + RemoteMonitorServer.removeConnection(connection.getInetAddress()));
 	}
 
+	/**
+	 * Determines whether a connection is dead by trying to send a connection packet
+	 * over to the client. If there's an IOException, then return false
+	 * @return Boolean representing the alive status of the connection
+	 */
 	public boolean isConnectionDead() {
 		try {
 			output.writeBytes(PacketHeader.CONN + System.getProperty("line.separator"));

@@ -26,8 +26,8 @@ public class ServerPanel extends JPanel implements ActionListener {
 
 	// Buttons under list
 	protected static final int BUTTON_HEIGHT = 25;
-	private JButton clearDead = new JButton("Clear dead connections");
-	private JButton clearAll = new JButton("Clear all connections");
+	private JButton clearDead;
+	private JButton clearAll;
 
 	// List
 	protected static final int LIST_WIDTH = 350;
@@ -50,6 +50,8 @@ public class ServerPanel extends JPanel implements ActionListener {
 		setLayout(null);
 
 		// Creates list components and settings
+		clearDead = new JButton("Force clear dead connections"); 
+		clearAll = new JButton("Clear all connections"); 
 		listModel = new DefaultListModel<InetAddress>();
 		clientList = new JList<InetAddress>(listModel);
 		clientList.setCellRenderer(new ClientListRenderer());
@@ -68,7 +70,7 @@ public class ServerPanel extends JPanel implements ActionListener {
 				"Once connected, right click on any entry in the list to the left to execute various functions",
 				"",
 				"Your internal server IP is " + InetAddress.getLocalHost().getHostAddress() + ", with hostname " + InetAddress.getLocalHost().getHostName(),
-				});
+		});
 
 		// Sets up the various action listeners
 		// Right click mouse listener for the right click menu on the client list
@@ -98,7 +100,7 @@ public class ServerPanel extends JPanel implements ActionListener {
 		add(clearAll);
 		add(sidePanel);
 	}
-	
+
 	/**
 	 * Resets the side panel to an empty blank panel
 	 */
@@ -110,20 +112,25 @@ public class ServerPanel extends JPanel implements ActionListener {
 		revalidate();
 		repaint();
 	}
-	
+
 	/**
 	 * Resets the side panel to a specified image
 	 * @param img Image to be displayed
 	 */
 	public void resetPictureArea(BufferedImage img) {
 		remove(sidePanel);
-		sidePanel = new SidePanel(img);
+		
+		// Ensures there's actually a picture to draw. If not, just show a error text field
+		if (img != null)
+			sidePanel = new SidePanel(img);
+		else sidePanel = new SidePanel(new String[] {"Client was unable to take a screenshot! Sorry!"});
+		
 		sidePanel.setBounds(LIST_WIDTH + 30, 15, ServerFrame.WINDOW_WIDTH - (55 + LIST_WIDTH), ServerFrame.WINDOW_HEIGHT - 15);
 		add(sidePanel);
 		revalidate();
 		repaint();
 	}
-	
+
 	/**
 	 * Updates the list of connected clients
 	 */
@@ -156,7 +163,7 @@ public class ServerPanel extends JPanel implements ActionListener {
 				RemoteMonitorServer.removeAllConnections();
 		}
 	}
-	
+
 	/**
 	 * Gets the side panel to add the text onto the text field if that exists
 	 * @param key Text to add onto the text area
