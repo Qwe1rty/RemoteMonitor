@@ -91,7 +91,7 @@ public class RemoteMonitorServer {
 		} while (true);
 
 		// Creates the server frame
-		frame = new ServerFrame("Remote Monitor");
+		frame = new ServerFrame("Remote Monitor - " + InetAddress.getLocalHost().getHostAddress());
 
 		// Sets up authentication listener. Main thread will be listening for new connections
 		// until program is closed
