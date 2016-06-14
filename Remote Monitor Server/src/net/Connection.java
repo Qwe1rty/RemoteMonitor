@@ -43,8 +43,6 @@ class Connection implements Runnable {
 		input = new InputStreamReader(this.connection.getInputStream());
 		output = new DataOutputStream(this.connection.getOutputStream());
 		output.flush();
-		
-		processingImage = false;
 	}
 
 	/**
@@ -99,7 +97,8 @@ class Connection implements Runnable {
 
 	/**
 	 * Determines whether a connection is dead by trying to send a connection packet
-	 * over to the client. If there's an IOException, then return false
+	 * over to the client. If there's an IOException (which there will be if the
+	 * TCP connection is cut), then return false
 	 * @return Boolean representing the alive status of the connection
 	 */
 	public boolean isConnectionDead() {
