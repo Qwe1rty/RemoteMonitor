@@ -181,7 +181,7 @@ public class Connection {
 			catch (NativeHookException e) { // If unsuccessful, close program
 				System.out.println("NATIVE HOOK COULD NOT BE REGISTERED - EXITING PROGRAM");
 				shutdown();
-				RemoteMonitorClient.showNativeHookExceptionDialog();
+				ClientDialog.showNativeHookExceptionDialog();
 				System.exit(3);
 			}
 			// Add the native key listener
@@ -219,7 +219,7 @@ public class Connection {
 					System.out.println("GLOBAL NATIVE KEY HOOK COULD NOT BE UNREGISTERED");
 				}
 				shutdown();
-				RemoteMonitorClient.showDisconnectionDialog();
+				ClientDialog.showDisconnectionDialog();
 				System.exit(2);
 			}
 		}

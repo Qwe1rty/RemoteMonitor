@@ -146,6 +146,11 @@ public class RemoteMonitorServer {
 				, "Connection lost", JOptionPane.INFORMATION_MESSAGE);
 	}
 	
+	/**
+	 * Displays a dialog notifying the user that this process cannot be undone 
+	 * and confirms that the user actually wants to do this
+	 * @return Integer representing the number of clients disconnected
+	 */
 	public static int displayClearAllDialog() {
 		return JOptionPane.showConfirmDialog(null,
 				"This process cannot be undone!"

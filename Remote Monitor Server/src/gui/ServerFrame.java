@@ -5,6 +5,10 @@ import java.net.UnknownHostException;
 
 import javax.swing.JFrame;
 
+/**
+ * Creates a new GUI JFrame for the program
+ * @author Caleb Choi
+ */
 public class ServerFrame extends JFrame {
 
 	private ServerPanel mainPanel;

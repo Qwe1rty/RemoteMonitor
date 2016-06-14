@@ -17,7 +17,6 @@ import javax.swing.UIManager;
 public class RemoteMonitorClient {
 
 	private static final int PORT = 60922;
-	private static final int AUTH_TIMEOUT = 10; // default is 15, for 15 secs
 
 	// Client has only one connection unlike server, so static fields are ok here
 	private static InetAddress serverIP;
@@ -43,15 +42,7 @@ public class RemoteMonitorClient {
 		// Shows a consent prompt to ensure that the user is willfully allowing
 		// their computer to be monitored. Also, all the dialog boxes prevent someone
 		// from just silently running the stub without the owner's knowledge
-		int consentResponse = JOptionPane.showConfirmDialog(null, 
-				"Are you sure you would like to allow this program to send your keyboard input and screen"
-						+ System.getProperty("line.separator")
-						+ "feed to another computer? You will not be able to terminate the program via normal means."
-						+ System.getProperty("line.separator")
-						+ System.getProperty("line.separator")
-						+ "If you are unsure whether to proceed, DO NOT continue.",
-						"Program consent", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-		if (consentResponse != 0) System.exit(0);
+		if (ClientDialog.showConsentResponseDialog() != 0) System.exit(0);
 
 		// Prompts user to enter a key and generates hash
 		boolean firstInput = true;
@@ -59,12 +50,7 @@ public class RemoteMonitorClient {
 			String seed;
 
 			// Show input dialog
-			if (firstInput) seed = JOptionPane.showInputDialog(null, 
-					"Enter an authentication key\nIt must be 8 characters or longer",
-					"Program Input", JOptionPane.QUESTION_MESSAGE);
-			else seed = JOptionPane.showInputDialog(null, 
-					"That is an invalid key! Try again\nEnter an authentication key\nIt must be 8 characters or longer",
-					"Program Input", JOptionPane.QUESTION_MESSAGE);
+			seed = ClientDialog.showKeyDialog(firstInput);
 
 			// If user clicked cancel or red X, exit program
 			// If string is less than 8 chars long, retry
@@ -82,12 +68,7 @@ public class RemoteMonitorClient {
 			String serverIP;
 
 			// Show input dialog
-			if (firstInput) serverIP = JOptionPane.showInputDialog(null, 
-					"Enter the server IP address\nPort is automatically assigned",
-					"Program Input", JOptionPane.QUESTION_MESSAGE);
-			else serverIP = JOptionPane.showInputDialog(null, 
-					"That is an invalid address! Try again!\nEnter the server IP address\nPort will be automatically assigned",
-					"Program Input", JOptionPane.QUESTION_MESSAGE);
+			serverIP = ClientDialog.showServerIPDialog(firstInput);
 
 			// Exit if used clicked cancel or red X
 			if (serverIP == null) System.exit(0);
@@ -111,18 +92,18 @@ public class RemoteMonitorClient {
 			// Once the server sends a kill request, user is notified
 			try {
 				connection.listen();
-				showTerminationDialog();
+				ClientDialog.showTerminationDialog();
 				System.exit(0);
 
 			} catch (IOException ie) { // If IOException is caught here, that means the client disconnected
-				showDisconnectionDialog();
+				ClientDialog.showDisconnectionDialog();
 				ie.printStackTrace();
 				System.exit(2);
 			}
 
 		} catch (Exception e) { // If anything goes wrong with authentication, inform user of failure 
 			e.printStackTrace();
-			showUnauthenticatedDialog();
+			ClientDialog.showUnauthenticatedDialog();
 			System.exit(1);
 		}
 	}
@@ -154,14 +135,7 @@ public class RemoteMonitorClient {
 			return true;
 		} catch (Exception e) {return false;}
 	}
-
-	public static InetAddress getServerIP() {return serverIP;}
-	public static void setServerIP(InetAddress serverIP) {RemoteMonitorClient.serverIP = serverIP;}
-	public static String getHash() {return hash;}
-	public static void setHash(String hash) {RemoteMonitorClient.hash = hash;}
-	public static int getPort() {return PORT;}
-	public static int getAuthTimeout() {return AUTH_TIMEOUT;}
-
+	
 	/**
 	 * Generates an SHA1 hash given an input key
 	 * 
@@ -185,59 +159,33 @@ public class RemoteMonitorClient {
 	}
 
 	/**
-	 * Show the information dialog when the server terminates the client's connection
+	 * Returns the server IP in InetAddress form
+	 * @return The server IP as an InetAddress
 	 */
-	public static void showTerminationDialog() { // exit code 0
-		JOptionPane.showMessageDialog(null, 
-				"Remote monitor client connection has been successfully terminated by the server " + serverIP.getHostAddress() + "."
-						+ System.getProperty("line.separator")
-						+ System.getProperty("line.separator")
-						+ "If you are unsure why you are seeing this message, please contact your system administrator"
-						+ System.getProperty("line.separator")
-						+ "immediately. There may have been unauthorized access to your computer and your personal data "
-						+ System.getProperty("line.separator")
-						+ "has potentially been stolen."
-						, "Connection Terminated", JOptionPane.INFORMATION_MESSAGE);
-	}
+	public static InetAddress getServerIP() {return serverIP;}
+	
+	/**
+	 * Sets the server IP address
+	 * @param serverIP The server IP address as an InetAddress
+	 */
+	public static void setServerIP(InetAddress serverIP) {RemoteMonitorClient.serverIP = serverIP;}
+	
+	/**
+	 * Gets the authentication hash
+	 * @return The authentication hash
+	 */
+	public static String getHash() {return hash;}
+	
+	/**
+	 * Sets the authentication hash
+	 * @param hash The authentication hash
+	 */
+	public static void setHash(String hash) {RemoteMonitorClient.hash = hash;}
 
 	/**
-	 * Shows the error dialog when the client is unable to authenticate with the server
+	 * Gets the TCP communication port 
+	 * @return The TCP communication port
 	 */
-	public static void showUnauthenticatedDialog() { // exit code 1
-		JOptionPane.showMessageDialog(null, 
-				"Unable to authenticate with server. Program will now terminate" 
-				, "Authentication unsuccessful", JOptionPane.ERROR_MESSAGE);
-	}
+	public static int getPort() {return PORT;}
 	
-	/**
-	 * Show the error dialog when the client has been disconnected from the server unexpectedly
-	 */
-	public static void showDisconnectionDialog() { // exit code 2
-		JOptionPane.showMessageDialog(null, 
-				"Remote monitor connection has been unexpectedly disconnected from the server " + serverIP.getHostAddress() + "."
-						+ System.getProperty("line.separator")
-						+ System.getProperty("line.separator")
-						+ "If you are unsure why you are seeing this message, please contact your system administrator"
-						+ System.getProperty("line.separator")
-						+ "immediately. There may have been unauthorized access to your computer and your personal data "
-						+ System.getProperty("line.separator")
-						+ "has potentially been stolen."
-						, "Connection Terminated", JOptionPane.ERROR_MESSAGE);
-	}
-	
-	/**
-	 * Show the error dialog when the client has been disconnected from the server unexpectedly
-	 */
-	public static void showNativeHookExceptionDialog() { // exit code 3
-		JOptionPane.showMessageDialog(null, 
-				"Native key hook was unsuccessful and will now disconnect from the server " + serverIP.getHostAddress() + "."
-						+ System.getProperty("line.separator")
-						+ System.getProperty("line.separator")
-						+ "If you are unsure why you are seeing this message, please contact your system administrator"
-						+ System.getProperty("line.separator")
-						+ "immediately. There may have been unauthorized access to your computer and your personal data "
-						+ System.getProperty("line.separator")
-						+ "has potentially been stolen."
-						, "Connection Terminated", JOptionPane.ERROR_MESSAGE);
-	}
 }

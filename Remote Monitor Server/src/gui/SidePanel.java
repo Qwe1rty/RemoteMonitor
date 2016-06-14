@@ -207,12 +207,6 @@ public class SidePanel extends JPanel {
 		repaint();
 	}
 
-	public static BufferedImage resize(BufferedImage image, int newWidth, int newHeight) { 
-		Image temp = image.getScaledInstance(newWidth, newHeight, Image.SCALE_SMOOTH);
-		BufferedImage dimg = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
-		return dimg;
-	}  
-
 	/**
 	 * Adds the provided string onto the text area, if it exists
 	 * @param key Text to add onto the text area

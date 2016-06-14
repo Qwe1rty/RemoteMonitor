@@ -22,6 +22,10 @@ import javax.swing.SwingUtilities;
 import main.RemoteMonitorServer;
 import net.PacketHeader;
 
+/**
+ * Contains all GUI components to be displayed on the frame 
+ * @author Caleb Choi
+ */
 public class ServerPanel extends JPanel implements ActionListener {
 
 	// Buttons under list
