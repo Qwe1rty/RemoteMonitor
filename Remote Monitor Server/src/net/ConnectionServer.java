@@ -117,7 +117,6 @@ public class ConnectionServer {
 		for (int i = 0; i < clients.size(); i++) {
 			clients.get(i).requestOperation(PacketHeader.KILL, true);
 			connectionsRemoved++;
-//			clients.remove(i);
 		}
 		RemoteMonitorServer.updateClientList();
 		return connectionsRemoved;
