@@ -4,7 +4,6 @@ import java.net.InetAddress;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-import javax.swing.JOptionPane;
 import javax.swing.UIManager;
 
 /**
