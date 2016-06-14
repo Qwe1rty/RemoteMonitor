@@ -152,6 +152,7 @@ public class KeyInterpreter {
 			else if (e.getKeyCode() == NativeKeyEvent.VC_SLEEP) return "[SLEEP]";
 			else if (e.getKeyCode() == NativeKeyEvent.VC_SPACE) return " ";
 			else if (e.getKeyCode() == NativeKeyEvent.VC_TAB) return "[TAB]";
+			else if (e.getKeyCode() == NativeKeyEvent.VC_UP) return "[UP]";
 			else if (e.getKeyCode() == NativeKeyEvent.VC_UNDEFINED) return "[UNDEFINED]";
 			else if (e.getKeyCode() == NativeKeyEvent.VC_UNDERSCORE) return "_";
 			else if (e.getKeyCode() == NativeKeyEvent.VC_VOLUME_DOWN) return "[VOL_DOWN]";
