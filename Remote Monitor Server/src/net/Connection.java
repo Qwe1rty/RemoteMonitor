@@ -1,5 +1,7 @@
 package net;
 
+import gui.ServerDialog;
+
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -154,7 +156,7 @@ class Connection implements Runnable {
 						
 					} catch (IOException e) { // IOException means the client disconnected
 						shutdown(); 
-						if (!forced) RemoteMonitorServer.displayConnectionCutDialog(connection.getInetAddress());
+						if (!forced) ServerDialog.showConnectionCutDialog(connection.getInetAddress());
 						operation = null;
 					}
 				}
@@ -192,7 +194,7 @@ class Connection implements Runnable {
 				
 			} catch (IOException e) { // IOException means the client disconnected
 				shutdown(); 
-				if (!forced) RemoteMonitorServer.displayConnectionCutDialog(connection.getInetAddress());
+				if (!forced) ServerDialog.showConnectionCutDialog(connection.getInetAddress());
 			}
 		} else if (header.equals(PacketHeader.KILL)) { // Tells client to terminate its existence
 

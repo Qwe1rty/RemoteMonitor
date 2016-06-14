@@ -47,10 +47,8 @@ public class RemoteMonitorClient {
 		// Prompts user to enter a key and generates hash
 		boolean firstInput = true;
 		do {
-			String seed;
-
 			// Show input dialog
-			seed = ClientDialog.showKeyDialog(firstInput);
+			String seed = ClientDialog.showKeyDialog(firstInput);
 
 			// If user clicked cancel or red X, exit program
 			// If string is less than 8 chars long, retry
@@ -65,10 +63,8 @@ public class RemoteMonitorClient {
 		// Setup for packet sending
 		firstInput = true;
 		do {
-			String serverIP;
-
 			// Show input dialog
-			serverIP = ClientDialog.showServerIPDialog(firstInput);
+			String serverIP = ClientDialog.showServerIPDialog(firstInput);
 
 			// Exit if used clicked cancel or red X
 			if (serverIP == null) System.exit(0);

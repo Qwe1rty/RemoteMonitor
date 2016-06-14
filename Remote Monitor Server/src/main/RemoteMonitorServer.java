@@ -1,4 +1,5 @@
 package main;
+import gui.ServerDialog;
 import gui.ServerFrame;
 
 import java.awt.HeadlessException;
@@ -49,26 +50,13 @@ public class RemoteMonitorServer {
 		}));
 		
 		// Shows the warning message not to use this program in a dumb manner
-		int warningResponse = JOptionPane.showConfirmDialog(null, 
-				"This program will have the ability to record and save keyboard and screen from another computer."
-						+ System.getProperty("line.separator")
-						+ "Misuse of this program can be considered a federal crime and can lead to severe punishment."
-						+ System.getProperty("line.separator")
-						+ "Only use this program with the expressed consent of the client computer's owner(s)."
-						+ System.getProperty("line.separator")
-						+ System.getProperty("line.separator")
-						+ "Are you sure you would like to proceed?",
-						"Program usage warning", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-		if (warningResponse != 0) System.exit(0);
+		if (ServerDialog.showUsageWarningDialog() != 0) System.exit(0);
 
 		// Prompts user to enter a key and generates hash
 		boolean firstInput = true;
 		do {
-			String seed;
-
 			// Show input dialog
-			if (firstInput) seed = JOptionPane.showInputDialog(frame, "Enter an authentication key\nIt must be 8 characters or longer"); 
-			else seed = JOptionPane.showInputDialog(frame, "That is an invalid key! Try again\nEnter an authentication key\nIt must be 8 characters or longer");
+			String seed = ServerDialog.showKeyDialog(firstInput); 
 
 			// If user clicked cancel or red X, exit program
 			// If string is less than 8 chars long, retry
@@ -79,11 +67,7 @@ public class RemoteMonitorServer {
 				// Try to generate hash. If unable to (exception thrown), close program
 				hash = generateHash(seed);
 				if (hash == null) {
-					JOptionPane.showMessageDialog(null,
-							"Program was unable to generate hash from entered key"
-									+ System.getProperty("line.separator")
-									+ "Remote monitor server will now terminate"
-									, "Program error", JOptionPane.ERROR_MESSAGE);
+					ServerDialog.showHashGenerationFailureDialog();
 					System.exit(0);
 				}
 				break;
@@ -101,11 +85,7 @@ public class RemoteMonitorServer {
 
 			// Notify user that something went wrong
 			System.out.println("SERVER SOCKET ERROR");
-			JOptionPane.showMessageDialog(null, 
-					"An unexpected connectivity error occured in the server socket"
-							+ System.getProperty("line.separator")
-							+ "Program will now exit. Please restart the program to try again", 
-							"Unexpected error", JOptionPane.ERROR_MESSAGE);
+			ServerDialog.showServerSocketErrorDialog();
 			System.exit(3);
 		}
 
@@ -133,32 +113,6 @@ public class RemoteMonitorServer {
 		return hexStr;
 	}
 	
-	/**
-	 * Displays a dialog to the user that a certain connection has been lost
-	 * @param connection IP address of the disconnected client
-	 */
-	public static void displayConnectionCutDialog(InetAddress connection) {
-		JOptionPane.showMessageDialog(null, 
-				"The connection with " + connection.getHostAddress() 
-				+ " (" + connection.getHostName() + ") has been lost."
-				+ System.getProperty("line.separator")
-				+ "This client will be removed from the server."
-				, "Connection lost", JOptionPane.INFORMATION_MESSAGE);
-	}
-	
-	/**
-	 * Displays a dialog notifying the user that this process cannot be undone 
-	 * and confirms that the user actually wants to do this
-	 * @return Integer representing the number of clients disconnected
-	 */
-	public static int displayClearAllDialog() {
-		return JOptionPane.showConfirmDialog(null,
-				"This process cannot be undone!"
-				+ System.getProperty("line.separator")
-				+ "Are you should you would like to continue?"
-				, "Confirm action", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-	}
-
 	// The following are all basically wrapper methods for the private fields
 
 	/**
@@ -199,7 +153,7 @@ public class RemoteMonitorServer {
 				+ " dead connection(s) have been removed"
 				, "Operation result", JOptionPane.INFORMATION_MESSAGE);
 	}
-	
+
 	/**
 	 * Tells the client server to remove all client connections. A dialog box
 	 * will appear telling the user how many clients were terminated/removed
@@ -210,7 +164,7 @@ public class RemoteMonitorServer {
 				+ " connection(s) have been removed"
 				, "Operation result", JOptionPane.INFORMATION_MESSAGE);
 	}
-
+	
 	/**
 	 * Returns the client server's connection list
 	 * @return ArrayList of all current active client connections

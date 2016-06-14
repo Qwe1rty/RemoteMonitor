@@ -163,7 +163,7 @@ public class ServerPanel extends JPanel implements ActionListener {
 		else if (e.getSource() == clearDead)
 			RemoteMonitorServer.removeDeadConnections();
 		else if (e.getSource() == clearAll) {
-			if (RemoteMonitorServer.displayClearAllDialog() == 0)
+			if (ServerDialog.showClearAllDialog() == 0)
 				RemoteMonitorServer.removeAllConnections();
 		}
 	}
