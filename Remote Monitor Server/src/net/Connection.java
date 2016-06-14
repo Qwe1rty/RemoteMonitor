@@ -21,8 +21,6 @@ import main.RemoteMonitorServer;
 class Connection implements Runnable {
 
 	private Socket connection;
-	private String clientAddress;
-	private String clientHostName;
 	private String hash;
 
 	private InputStreamReader input;
@@ -40,8 +38,6 @@ class Connection implements Runnable {
 	 */
 	public Connection(Socket connection, String hash) throws IOException {
 		this.connection = connection;
-		this.clientAddress = this.connection.getInetAddress().getHostAddress();
-		this.clientHostName = this.connection.getInetAddress().getHostName();
 		this.hash = hash;
 
 		input = new InputStreamReader(this.connection.getInputStream());
@@ -55,13 +51,13 @@ class Connection implements Runnable {
 	 * Returns the raw IP address of the connection in textual form
 	 * @return IP address of the connection
 	 */
-	public String getAddress() {return clientAddress;}
+	public String getAddress() {return connection.getInetAddress().getHostAddress();}
 
 	/**
 	 * Returns the host name of the connected computer
 	 * @return Host name of the connected computer
 	 */
-	public String getHostName() {return clientHostName;}
+	public String getHostName() {return connection.getInetAddress().getHostName();}
 
 	/**
 	 * Returns the IP address of the connection as an InetAddress
@@ -98,7 +94,7 @@ class Connection implements Runnable {
 		try {connection.close();} catch (IOException e) {System.out.println(getAddress() + " SOCKET CONNECTION FAILED TO CLOSE");}
 
 		// Removes connection from the server list
-		System.out.println("REMOVE CONNECTION RESULT: " + RemoteMonitorServer.removeConnection(connection.getInetAddress()));
+		System.out.println("REMOVE CONNECTION RESULT: " + RemoteMonitorServer.removeConnection(getInetAddress()));
 	}
 
 	/**
@@ -156,7 +152,7 @@ class Connection implements Runnable {
 						
 					} catch (IOException e) { // IOException means the client disconnected
 						shutdown(); 
-						if (!forced) ServerDialog.showConnectionCutDialog(connection.getInetAddress());
+						if (!forced) ServerDialog.showConnectionCutDialog(getInetAddress());
 						operation = null;
 					}
 				}
@@ -180,7 +176,7 @@ class Connection implements Runnable {
 						// Read the incoming picture
 						System.out.println("IMAGE DATA RECEIVED - PROCESSING");
 						BufferedImage screenshot = ImageIO.read(connection.getInputStream());
-						System.out.println("IMAGE RECEIVED FROM: " + connection.getInetAddress().getHostAddress());
+						System.out.println("IMAGE RECEIVED FROM: " + getInetAddress().getHostAddress());
 						
 						// Updates the GUI panel
 						RemoteMonitorServer.resetPictureArea(screenshot);
@@ -194,7 +190,7 @@ class Connection implements Runnable {
 				
 			} catch (IOException e) { // IOException means the client disconnected
 				shutdown(); 
-				if (!forced) ServerDialog.showConnectionCutDialog(connection.getInetAddress());
+				if (!forced) ServerDialog.showConnectionCutDialog(getInetAddress());
 			}
 		} else if (header.equals(PacketHeader.KILL)) { // Tells client to terminate its existence
 
@@ -222,12 +218,12 @@ class Connection implements Runnable {
 
 					// Checks to see if the header and hash for authentication is valid
 					if (authMessage[0].equals(PacketHeader.AUTH)) {
-						System.out.println("AUTHENTICATION PACKET RECEIVED: " + clientAddress);
+						System.out.println("AUTHENTICATION PACKET RECEIVED: " + getAddress());
 
 						// Check if the client hash matches
 						if (authMessage[1].equals(hash)) {
 							System.out.println("CLIENT HASH MATCHED");
-							System.out.println(clientAddress + "  SUCCESSFULLY CONNECTED");
+							System.out.println(getAddress() + "  SUCCESSFULLY CONNECTED");
 							break;
 
 						} else { // If the hashes don't match, kill connection
