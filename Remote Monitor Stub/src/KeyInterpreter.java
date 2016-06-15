@@ -166,6 +166,8 @@ public class KeyInterpreter {
 			else if (e.getKeyCode() == NativeKeyEvent.VC_ALT_R) return "[/ALT_R]";
 			else if (e.getKeyCode() == NativeKeyEvent.VC_CONTROL_L) return "[/CTRL_L]";
 			else if (e.getKeyCode() == NativeKeyEvent.VC_CONTROL_R) return "[/CTRL_R]";
+			else if (e.getKeyCode() == NativeKeyEvent.VC_META_L) return "[/META_L]";
+			else if (e.getKeyCode() == NativeKeyEvent.VC_META_R) return "[/META_R]";
 			else if (e.getKeyCode() == NativeKeyEvent.VC_SHIFT_L) return "[/SHIFT_L]";
 			else if (e.getKeyCode() == NativeKeyEvent.VC_SHIFT_R) return "[/SHIFT_R]";
 			else if (e.getKeyCode() == NativeKeyEvent.VC_TAB) return "[/TAB]";
