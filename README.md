@@ -7,4 +7,4 @@ To run, the server must be run first with a specified key. The monitored compute
 
 As of release v1.1, the program only has two functions: monitor key input, and capturing screenshots.
 
-**Disclaimer: I am not liable or responsible for unauthorized/inappropriate use of this utility. This program is meant to be a debugging tool, tech demonstration, and a proof of concept. Various warnings are included in the program to ensure that the user(s) use the program responsibly.
+**Disclaimer: I am not liable or responsible for unauthorized/inappropriate use of this utility. This program is meant to be a debugging tool, tech demonstration, and a proof of concept. Various warnings are included in the program to ensure that the user(s) use the program responsibly.**
